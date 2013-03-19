@@ -1,0 +1,9 @@
+
+ - implement catch (ClassName $e) { ... }
+ - implement finally
+ - croak if "return" is called inside try/catch block
+    -> later: implement return from subrutine inside try/catch/finally blocks
+ - test line numbers
+ - test nested structure
+ - cleanup module Syntax::Feature::Try
+        -> move parser into separate module
