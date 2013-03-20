@@ -4,6 +4,19 @@ use Moose;
 
 extends 'Dist::Zilla::Plugin::MakeMaker::Awesome';
 
+around _build_WriteMakefile_args => sub {
+    my ($orig, $self) = @_;
+
+    my $args = $self->$orig();
+
+    foreach my $key (qw/ TRY_PARSER_DEBUG TRY_PARSER_DUMP /) {
+        next if not $ENV{$key};
+        $args->{DEFINE} //= "";
+        $args->{DEFINE} .= " -D$key";
+    }
+    return $args;
+};
+
 around _build_MakeFile_PL_template => sub {
     my ($orig, $self) = @_;
     return $self->$orig . q[

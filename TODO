@@ -1,9 +1,21 @@
+ - publish -> cpan (first alpha testing/experimental release)
 
- - implement catch (ClassName $e) { ... }
+ - use keyword plugin api (get rid of Devel::CallParser dependency)
+        - keyword_plugin_function
+        - KEYWORD_PLUGIN_STMT
+
  - implement finally
- - croak if "return" is called inside try/catch block
+ - croak if "return/wantarray" is called inside try/catch block
+    -> similar for next,last,redo
     -> later: implement return from subrutine inside try/catch/finally blocks
- - test line numbers
- - test nested structure
+
  - cleanup module Syntax::Feature::Try
         -> move parser into separate module
+
+ - update stacktrace / caller ? 
+
+ - test usage in different module that it is used
+
+ - implement keyword "rethrow" or simple use die?
+ - rewrite documentation to English ;)
+ - check TODOs in source-code

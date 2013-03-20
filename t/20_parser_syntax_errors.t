@@ -1,0 +1,132 @@
+use Test::Spec;
+
+use FindBin qw/ $Bin /;
+use lib "$Bin/lib";
+use test_tools qw/ test_syntax_error /;
+
+describe "parser" => sub {
+
+    describe "try" => sub {
+        it "throws error if it is not followed by block of code" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try
+                    catch (My::Class1 $aa) {}
+                    my $6=y;
+                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if code-reference after try is used instead of block" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    sub foo { }
+                    try &foo
+                    catch ($aa) { }
+                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if try block is not followed by catch/finally block" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    my $i;
+                    try { $i++ }
+                    $i += 10;
+                ], qr/^syntax error: expected catch after try block at \(eval \d+\) line 6.$/;
+        };
+
+        it "throws error if it is not called in statement-context" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    my $x = try {}
+                            catch ($e) {}
+                    ;
+                ], qr/^syntax error at \(eval \d+\) line/;
+        };
+    };
+
+    describe "catch" => sub {
+        it "throws error if it is not called after try block" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    my $e;
+                    catch ($e) { }
+                ], qr/^syntax error at \(eval \d+\) line 5/;
+        };
+
+        it "throws error if it is not followed by '('" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch (My::Test1 $e) {
+                        my $i = 7;
+                    }
+                    catch {
+                    }
+                ], qr/^syntax error: expected '\(' after catch at \(eval \d+\) line 8.$/;
+        };
+
+        it "throws error if class-name has invalid syntax" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch (Test::Foo:x $abc) { }
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if variable is missing" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch () { }
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if variable is not simple scalar" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch (My::Class::A @aa) { }
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if variable name is missing" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch (Moo::AA $goo) { }
+                    catch ($) { }
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 6.$/;
+        };
+
+        it "throws error if variable is not followed by ')'" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch ($abc->test) { }
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if block after catch definition is missing" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    catch ($err)
+                    my $a=0;
+                ], qr/^syntax error: expected block after 'catch\(\)' at \(eval \d+\) line 6.$/;
+        };
+    };
+};
+
+runtests;
