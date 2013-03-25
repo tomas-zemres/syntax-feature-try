@@ -166,23 +166,35 @@ static OP *parse_catch_args() {
 static OP *parse_all_catch_blocks() {
     OP *catch_list, *catch_args;
 
-    catch_list = 0;
+    catch_list = NULL;
     while (parse_keyword("catch")) {
         catch_args = parse_catch_args();
+        catch_args = newANONLIST(catch_args);
         
-        if (!catch_list) {
-            catch_list = newANONLIST(NULL);
-        }
-        catch_list = op_append_elem(OP_ANONLIST, catch_list,
-            newANONLIST(catch_args)
-        );
+        catch_list = catch_list
+                        ? op_append_elem(OP_LIST, catch_list, catch_args)
+                        : newLISTOP(OP_LIST, 0, catch_args, NULL);
     }
     return catch_list;
 }
 
+static OP *parse_finally_block() {
+    OP *finally_block;
+
+    if (!parse_keyword("finally")) {
+        return NULL;
+    }
+
+    finally_block = parse_code_block(NULL);
+    if (!finally_block) {
+        syntax_error("expected block after 'finally'");
+    }
+    return finally_block;
+}
+
 static OP *parse_try_statement(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
 {
-    OP *try_block, *catch_list, *catch_args, *catch_block;
+    OP *try_block, *catch_list, *catch_args, *catch_block, *finally_block;
 
     *flagsp |= CALLPARSER_STATEMENT;
 
@@ -190,15 +202,22 @@ static OP *parse_try_statement(pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     if (!try_block) {
         syntax_error("expected block after 'try'");
     }
+
     catch_list = parse_all_catch_blocks();
-    if (!catch_list) {
-        syntax_error("expected catch after try block");
+    finally_block = parse_finally_block();
+
+    if (!catch_list && !finally_block) {
+        syntax_error("expected catch/finally after try block");
     }
 
 #ifdef TRY_PARSER_DUMP
     op_dump(catch_list);
 #endif
-    return newLISTOP(OP_LIST, 0, try_block, catch_list);
+    return op_append_elem(
+        OP_LIST,
+        newLISTOP(OP_LIST, 0, try_block, newANONLIST(catch_list)),
+        finally_block
+    );
 }
 
 MODULE = Syntax::Feature::Try  PACKAGE = Syntax::Feature::Try

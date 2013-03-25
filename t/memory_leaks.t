@@ -19,6 +19,7 @@ no_leaks_ok {
             try { }
             catch (Mock::AAA $foo) { }
             catch ($oth) { }
+            finally { my $y=5; }
         }
     ];
 } "compilation phase does not generates memory-leaks";
@@ -31,8 +32,9 @@ no_leaks_ok {
     catch (Mock::BBB $e) { $res=2 }
     catch (Mock::CCC $e) { $res=3 }
     catch ($others) { $res=4 }
+    finally { $res += 100 }
 
-    die "Invalid response: $res" if $res != 2;
+    die "Invalid response: $res" if $res != 102;
 } "execution phase does not generates memory-leaks";
 
 done_testing;

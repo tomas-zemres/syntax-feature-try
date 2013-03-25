@@ -5,13 +5,21 @@ use warnings;
 use Scalar::Util qw/ blessed /;
 
 sub new {
-    my ($class, $try_block, $catch_list) = @_;
+    my ($class, $try_block, $catch_list, $finally_block) = @_;
 
     my $self = {
         try_block => $try_block,
         catch_list => $catch_list,
+        finally_block => $finally_block,
     };
     return bless($self, $class);
+}
+
+sub DESTROY {
+    my ($self) = @_;
+
+    return if not $self->{finally_block};
+    $self->{finally_block}->();
 }
 
 sub run {

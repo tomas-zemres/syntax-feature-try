@@ -17,16 +17,25 @@ sub install {
 }
 
 # TODO move following code to separate package ...::Parser
+use Carp;
 use Devel::CallParser;
 use XSLoader;
 use Exporter 'import';
 
-our @EXPORT = our @EXPORT_OK = qw/ try /;
+our @EXPORT = our @EXPORT_OK = qw/ try catch finally /;
 
 XSLoader::load();
 
 sub try {
     $HANDLER->new(@_)->run();
+}
+
+sub catch {
+    croak "syntax error: try/catch/finally block sequence";
+}
+
+sub finally {
+    croak "syntax error: finally without try block";
 }
 
 1;
@@ -102,7 +111,7 @@ via declared local variable C<$e>.
 
 =head2 rethrow error
 
-To rethrow caught error simple call die $err.
+To rethrow caught error simple call "die $err".
 For example (log any Connection::Error):
 
     try { ... }
@@ -113,7 +122,17 @@ For example (log any Connection::Error):
 
 =head2 finally
 
-    TODO not implmenented yet
+The L<finally block> is executed at the end of statement.
+It is always executed (even if try or catch block throw an error).
+
+    my $fh;
+    try {
+        $fh = IO::File->new("/etc/hosts");
+        ...
+    }
+    finally {
+        $fh->close;
+    }
 
 =head1 Exception::Class
 
@@ -153,9 +172,7 @@ because these blocks are internally called in different context.
 
 =over
 
-=item finally
-
-=item return
+=item return, wantarray, ...
 
 =back
 

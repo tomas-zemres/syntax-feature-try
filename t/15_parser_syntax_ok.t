@@ -10,7 +10,7 @@ describe "parser" => sub {
         compile_ok q[
             use syntax 'try';
 
-            ;try{ }catch($err){ };
+            ;try{ }catch($err){ }finally{ };
         ];
     };
 
@@ -22,6 +22,8 @@ describe "parser" => sub {
                 {  }
             catch
                 (   My::Test1   $aa     )
+                {  }
+            finally
                 {  }
         ];
     };
@@ -40,6 +42,9 @@ describe "parser" => sub {
                 )       # ddd
                 {       # eee
                 }       # fff
+            finally     # comment 111
+                {       # 222
+                }       # 333
         ];
     };
 };

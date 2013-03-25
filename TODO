@@ -4,8 +4,7 @@
         - keyword_plugin_function
         - KEYWORD_PLUGIN_STMT
 
- - implement finally
- - croak if "return/wantarray" is called inside try/catch block
+ - croak if "return/wantarray" is called inside try/catch/finally block
     -> similar for next,last,redo
     -> later: implement return from subrutine inside try/catch/finally blocks
 

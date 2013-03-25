@@ -39,9 +39,9 @@ describe "parser" => sub {
         test_code_warnings q[
             use syntax 'try';
 
-            try { warn "AAA"; die 123; } catch ($e) { warn "BBB" }
-            warn "CCC";
-        ], qw/ AAA BBB CCC /;
+            try { warn "AAA"; die 123; } catch ($e) { warn "BBB" } finally { warn "CCC" }
+            warn "DDD";
+        ], qw/ AAA BBB CCC DDD /;
 
         test_code_warnings q[
             use syntax 'try';
@@ -52,8 +52,11 @@ describe "parser" => sub {
             } catch ($e) {
                 warn "BBB";
             }
-            warn "CCC";
-        ], qw/ AAA BBB CCC /;
+            finally {
+                warn "CCC";
+            }
+            warn "DDD";
+        ], qw/ AAA BBB CCC DDD /;
 
         test_code_warnings q[
             use syntax 'try';
@@ -73,9 +76,14 @@ describe "parser" => sub {
                 warn "BBB";
             }
 
-            warn "CCC"; 
+            finally 
+                {
+                    warn "CCC";
+                }
+
+            warn "DDD"; 
         
-        ], qw/ AAA BBB CCC /;
+        ], qw/ AAA BBB CCC DDD /;
     };
 };
 

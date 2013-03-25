@@ -34,7 +34,7 @@ describe "parser" => sub {
                     my $i;
                     try { $i++ }
                     $i += 10;
-                ], qr/^syntax error: expected catch after try block at \(eval \d+\) line 6.$/;
+                ], qr/^syntax error: expected catch\/finally after try block at \(eval \d+\) line 6.$/;
         };
 
         it "throws error if it is not called in statement-context" => sub {
@@ -127,6 +127,36 @@ describe "parser" => sub {
                 ], qr/^syntax error: expected block after 'catch\(\)' at \(eval \d+\) line 6.$/;
         };
     };
+
+    describe "finally" => sub {
+        it "throws error if it is not followed by block of code" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    finally 123
+                ], qr/^syntax error: expected block after 'finally' at \(eval \d+\) line 5.$/;
+        };
+
+        it "throws error if it is called without try block" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    finally {  }
+                ], qr/^syntax error: finally without try block at \(eval \d+\) line 4$/;
+        };
+
+        it "throws error if statement contains multiple 'finally' blocks" => sub {
+            test_syntax_error q[
+                    use syntax 'try';
+
+                    try { }
+                    finally {  }
+                    finally {  }
+                ], qr/^syntax error: finally without try block at \(eval \d+\) line 6$/;
+        };
+    };
+
 };
 
 runtests;

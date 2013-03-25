@@ -16,9 +16,15 @@ describe "nested try/catch" => sub {
                     push @log, "inner-catch";
                     die $e;    
                 }
+                finally {
+                    push @log, "inner-finally";
+                }
             }
             catch (AAA $e) {
                 push @log, "outer-catch";
+            }
+            finally {
+                push @log, "outer-finally";
             }
             push @log, "done";
         };
@@ -26,7 +32,9 @@ describe "nested try/catch" => sub {
         is_deeply(\@log, [qw/
                 inner-try
                 inner-catch
+                inner-finally
                 outer-catch
+                outer-finally
                 done
             /]);
     };
