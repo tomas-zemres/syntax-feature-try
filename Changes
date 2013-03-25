@@ -1,0 +1,6 @@
+Revision history for perl module Syntax::Feature::Try
+
+0.001   2013-03-25
+
+    First public version of module for try/catch/finally statement
+

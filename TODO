@@ -1,5 +1,3 @@
- - publish -> cpan (first alpha testing/experimental release)
-
  - use keyword plugin api (get rid of Devel::CallParser dependency)
         - keyword_plugin_function
         - KEYWORD_PLUGIN_STMT
