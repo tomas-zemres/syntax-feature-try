@@ -14,7 +14,7 @@ describe "parser" => sub {
                     try
                     catch (My::Class1 $aa) {}
                     my $6=y;
-                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if code-reference after try is used instead of block" => sub {
@@ -24,7 +24,7 @@ describe "parser" => sub {
                     sub foo { }
                     try &foo
                     catch ($aa) { }
-                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: expected block after 'try' at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if try block is not followed by catch/finally block" => sub {
@@ -34,7 +34,7 @@ describe "parser" => sub {
                     my $i;
                     try { $i++ }
                     $i += 10;
-                ], qr/^syntax error: expected catch\/finally after try block at \(eval \d+\) line 6.$/;
+                ], qr/^syntax error: expected catch\/finally after try block at \(eval \d+\) line 6[.]?$/;
         };
 
         it "throws error if it is not called in statement-context" => sub {
@@ -68,7 +68,7 @@ describe "parser" => sub {
                     }
                     catch {
                     }
-                ], qr/^syntax error: expected '\(' after catch at \(eval \d+\) line 8.$/;
+                ], qr/^syntax error: expected '\(' after catch at \(eval \d+\) line 8[.]?$/;
         };
 
         it "throws error if class-name has invalid syntax" => sub {
@@ -77,7 +77,7 @@ describe "parser" => sub {
 
                     try { }
                     catch (Test::Foo:x $abc) { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if variable is missing" => sub {
@@ -86,7 +86,7 @@ describe "parser" => sub {
 
                     try { }
                     catch () { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if variable is not simple scalar" => sub {
@@ -95,7 +95,7 @@ describe "parser" => sub {
 
                     try { }
                     catch (My::Class::A @aa) { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if variable name is missing" => sub {
@@ -105,7 +105,7 @@ describe "parser" => sub {
                     try { }
                     catch (Moo::AA $goo) { }
                     catch ($) { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 6.$/;
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 6[.]?$/;
         };
 
         it "throws error if variable is not followed by ')'" => sub {
@@ -114,7 +114,7 @@ describe "parser" => sub {
 
                     try { }
                     catch ($abc->test) { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if block after catch definition is missing" => sub {
@@ -124,7 +124,7 @@ describe "parser" => sub {
                     try { }
                     catch ($err)
                     my $a=0;
-                ], qr/^syntax error: expected block after 'catch\(\)' at \(eval \d+\) line 6.$/;
+                ], qr/^syntax error: expected block after 'catch\(\)' at \(eval \d+\) line 6[.]?$/;
         };
     };
 
@@ -135,7 +135,7 @@ describe "parser" => sub {
 
                     try { }
                     finally 123
-                ], qr/^syntax error: expected block after 'finally' at \(eval \d+\) line 5.$/;
+                ], qr/^syntax error: expected block after 'finally' at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if it is called without try block" => sub {
@@ -143,7 +143,7 @@ describe "parser" => sub {
                     use syntax 'try';
 
                     finally {  }
-                ], qr/^syntax error: finally without try block at \(eval \d+\) line 4$/;
+                ], qr/^syntax error: finally without try block at \(eval \d+\) line 4[.]?$/;
         };
 
         it "throws error if statement contains multiple 'finally' blocks" => sub {
@@ -153,7 +153,7 @@ describe "parser" => sub {
                     try { }
                     finally {  }
                     finally {  }
-                ], qr/^syntax error: finally without try block at \(eval \d+\) line 6$/;
+                ], qr/^syntax error: finally without try block at \(eval \d+\) line 6[.]?$/;
         };
     };
 

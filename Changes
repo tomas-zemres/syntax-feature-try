@@ -1,5 +1,9 @@
 Revision history for perl module Syntax::Feature::Try
 
+...    ???
+
+    Update tests for "parse errors"
+
 0.001   2013-03-25
 
     First public version of module for try/catch/finally statement
