@@ -33,8 +33,10 @@ sub compile_ok {
     my ($code, $err_patterni, $test_name) = @_;
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    eval $code;
+    my @result = eval $code;
     is($@, '', $test_name) or dump_code($code);
+
+    return @result;
 }
 
 1;

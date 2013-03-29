@@ -19,6 +19,7 @@ sub DESTROY {
     my ($self) = @_;
 
     return if not $self->{finally_block};
+    BEGIN { $^H{'Syntax::Feature::Try/block'} = 'finally' }
     $self->{finally_block}->();
 }
 
@@ -26,11 +27,15 @@ sub run {
     my ($self) = @_;
 
     local $@;
-    eval { $self->{try_block}->() };
+    eval {
+        BEGIN { $^H{'Syntax::Feature::Try/block'} = 'try' }
+        $self->{try_block}->();
+    };
     if ($@) {
         my $exception = $@;
         my $handler = $self->get_exception_handler($exception);
 
+        BEGIN { $^H{'Syntax::Feature::Try/block'} = 'catch' }
         $handler ? $handler->($exception)
                  : $self->rethrow($exception);
     }
@@ -57,6 +62,7 @@ sub exception_match_args {
 
 sub rethrow {
     my ($self, $exception) = @_;
+    local $SIG{__DIE__} = undef;
     die $exception;
 }
 

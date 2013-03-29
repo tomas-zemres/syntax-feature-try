@@ -1,13 +1,38 @@
 #include <EXTERN.h>
 #include <perl.h>
+
+#define NO_XSLOCKS
 #include <XSUB.h>
 
-static SV *hintkey_syntax_enabled;
+#include "hook_op_check.h"
+#include "hook_op_ppaddr.h"
+
+#define MAIN_PKG            "Syntax::Feature::Try"
+#define HINTKEY_ENABLED     MAIN_PKG "/enabled"
+#define HINTKEY_BLOCK       MAIN_PKG "/block"
+
+static SV *hintkey_enabled_sv, *hintkey_block_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
+
 static void setup_constants() {
-    hintkey_syntax_enabled = newSVpvs_share("Syntax::Feature::Try/enabled");
+    HV *stash;
+
+    hintkey_enabled_sv = newSVpvs_share(HINTKEY_ENABLED);
+    hintkey_block_sv = newSVpvs_share(HINTKEY_BLOCK);
+
+    stash = gv_stashpv(MAIN_PKG, 0);
+    newCONSTSUB(stash, "HINTKEY_ENABLED", hintkey_enabled_sv);
 }
+
+/* hints-hash functions */
+#define get_cop_hint_value(cop, key_sv)     cop_hints_fetch_sv((cop), (key_sv), 0, 0)
+
+#define get_stack_block_hint(cx) \
+        get_cop_hint_value((cx)->blk_oldcop, hintkey_block_sv)
+
+#define is_syntax_enabled \
+        SvTRUE( get_cop_hint_value(PL_curcop, hintkey_enabled_sv) )
 
 #define lex_buf_ptr         ( PL_parser->bufptr )
 #define lex_buf_end         ( PL_parser->bufend )
@@ -22,9 +47,8 @@ static void setup_constants() {
     #define DEBUG_MSG(fmt...)
 #endif
 
-static void syntax_error(const char *msg) {
-    croak("syntax error: %s", msg);
-}
+#define syntax_error(msg)   croak("syntax error: %s", msg)
+#define internal_error(msg) croak("internal " MAIN_PKG " error: %s", msg)
 
 static int parse_char(const char c) {
     if (lex_next_char != c) {
@@ -86,9 +110,42 @@ static SV *parse_identifier(int allow_namespace) {
     return ident;
 }
 
+static PERL_CONTEXT* get_current_sub_context() {
+    I32 i;
+    for (i = cxstack_ix; i >= 0; i--) {
+        register PERL_CONTEXT* cx = cxstack+i;
+        if (CxTYPE(cx) == CXt_SUB) {
+            return cx;
+        }
+    }
+    return NULL;
+}
+
+static int is_inside_special_block() {
+    const PERL_CONTEXT * const cx = get_current_sub_context();
+
+    return !cx || SvTRUE(get_stack_block_hint(cx));
+}
+
+static OP* my_before_return(pTHX_ OP *op, void *user_data) {
+    if (is_inside_special_block()) {
+        syntax_error("return inside try/catch/finally blocks is not working");
+    }
+    return op;
+}
+
+static OP *my_op_check(pTHX_ OP *op, void *user_data) {
+    if (is_syntax_enabled && (op->op_type == OP_RETURN)) {
+        hook_op_ppaddr_around(op, my_before_return, NULL, NULL);
+    }
+    return op;
+}
+
 static OP *parse_code_block(char *inject_code) {
     I32 floor;
-    OP *ret;
+    OP *ret_op;
+    dXCPT;
+    hook_op_check_id check_id_return;
 
     lex_read_space(0);
     if (lex_next_char != '{') {
@@ -103,12 +160,21 @@ static OP *parse_code_block(char *inject_code) {
         lex_stuff_pvs("{", 0);
     }
 
-    floor = start_subparse(0, CVf_ANON);
-    ret = newANONSUB(floor, NULL, parse_block(0));
-    lex_read_space(0);
+    check_id_return = hook_op_check(OP_RETURN, my_op_check, NULL);
+
+    XCPT_TRY_START {
+        floor = start_subparse(0, CVf_ANON);
+        ret_op = newANONSUB(floor, NULL, parse_block(0));
+    } XCPT_TRY_END
+
+    // finally remove op-checks
+    hook_op_check_remove(OP_RETURN, check_id_return);
+
+    XCPT_CATCH { XCPT_RETHROW; }
 
     DEBUG_MSG("{ ... }\n");
-    return ret;
+    lex_read_space(0);
+    return ret_op;
 }
 
 static void warn_on_unusual_class_name(char *name) {
@@ -198,32 +264,27 @@ static OP *parse_finally_block() {
     return finally_block;
 }
 
-static OP *new_op_method_call(OP *self, SV* meth_name, OP* args) {
-    return newUNOP(OP_ENTERSUB, OPf_STACKED,
-        op_append_elem(OP_LIST,
-            op_prepend_elem(OP_LIST, self, args),
-            newSVOP(OP_METHOD_NAMED, 0, meth_name)
-        )
-    );
-}
-
 /* build optree for:
- *  {
- *      Syntax::Feature::Try::Handler->new(@args)->run();
- *  }
+ *  <MAIN_PKG>::_handler(@args);
  */
-static OP *build_try_statement_op(OP *args) {
-    OP *op_class_name, *op_obj, *op_run;
-    op_class_name = newSVOP(OP_CONST, 0,
-                        newSVpvs_share("Syntax::Feature::Try::Handler"));
-    op_obj = new_op_method_call(op_class_name, newSVpvs_share("new"), args);
-    op_run = new_op_method_call(op_obj, newSVpvs_share("run"), NULL);
-    return op_scope(op_run);
+static OP *build_statement_optree(OP *args) {
+    HV *stash;
+    GV *handler_gv;
+    OP *call_op;
+
+    stash = gv_stashpv(MAIN_PKG, 0);
+    handler_gv = gv_fetchmethod(stash, "_handler");
+    call_op = newUNOP(OP_ENTERSUB, OPf_STACKED,
+            op_append_elem(OP_LIST, args,
+                newGVOP(OP_GV, 0, handler_gv)
+            )
+        );
+    return op_scope(call_op);
 }
 
 static OP *parse_try_statement()
 {
-    OP *try_block, *catch_list, *catch_args, *catch_block, *finally_block;
+    OP *try_block, *catch_list, *catch_args, *catch_block, *finally_block, *ret;
 
     try_block = parse_code_block(NULL);
     if (!try_block) {
@@ -237,37 +298,25 @@ static OP *parse_try_statement()
         syntax_error("expected catch/finally after try block");
     }
 
-#ifdef TRY_PARSER_DUMP
-    op_dump(catch_list);
-#endif
-    return build_try_statement_op(
+    ret = build_statement_optree(
         op_append_elem(
             OP_LIST,
             newLISTOP(OP_LIST, 0, try_block, newANONLIST(catch_list)),
             finally_block
         )
     );
+#ifdef TRY_PARSER_DUMP
+    op_dump(ret);
+#endif
+    return ret;
 }
 
 /* keyword plugin */
 
-#define is_keyword_active(hintkey_sv) THX_is_keyword_active(aTHX_ hintkey_sv)
-static int THX_is_keyword_active(pTHX_ SV *hintkey_sv)
+static int my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len,
+                                OP **op_ptr)
 {
-    HE *he;
-    if (!GvHV(PL_hintgv)) {
-        return 0;
-    }
-    he = hv_fetch_ent(GvHV(PL_hintgv), hintkey_sv, 0,
-            SvSHARED_HASH(hintkey_sv)
-        );
-    return he && SvTRUE(HeVAL(he));
-}
-
-static int my_keyword_plugin(
-            pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
-{
-    if (is_keyword_active(hintkey_syntax_enabled)) {
+    if (is_syntax_enabled) {
         if ((keyword_len == 3) && strnEQ(keyword_ptr, "try", 3)) {
             *op_ptr = parse_try_statement();
             return KEYWORD_PLUGIN_STMT;
@@ -293,3 +342,4 @@ BOOT:
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }
+

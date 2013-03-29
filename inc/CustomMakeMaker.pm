@@ -1,6 +1,7 @@
 package inc::CustomMakeMaker;
 
 use Moose;
+use ExtUtils::Depends;
 
 extends 'Dist::Zilla::Plugin::MakeMaker::Awesome';
 
@@ -14,7 +15,15 @@ around _build_WriteMakefile_args => sub {
         $args->{DEFINE} //= "";
         $args->{DEFINE} .= " -D$key";
     }
-    return $args;
+
+    my $depends = ExtUtils::Depends->new(qw/
+        Syntax::Feature::Try
+        B::Hooks::OP::Check
+        B::Hooks::OP::PPAddr
+    /);
+    return {%$args,
+        $depends->get_makefile_vars,
+    };
 };
 
 __PACKAGE__->meta->make_immutable;

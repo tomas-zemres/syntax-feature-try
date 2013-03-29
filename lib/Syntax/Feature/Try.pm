@@ -3,6 +3,8 @@ package Syntax::Feature::Try;
 use strict;
 use warnings;
 use XSLoader;
+use B::Hooks::OP::Check;
+use B::Hooks::OP::PPAddr;
 use Syntax::Feature::Try::Handler;
 
 our $VERSION = '0.002';
@@ -10,11 +12,15 @@ our $VERSION = '0.002';
 XSLoader::load();
 
 sub install {
-    $^H{"Syntax::Feature::Try/enabled"} = 1;
+    $^H{HINTKEY_ENABLED()} = 1;
 }
 
 sub uninstall {
-    $^H{"Syntax::Feature::Try/enabled"} = 0;
+    $^H{HINTKEY_ENABLED()} = 0;
+}
+
+sub _handler {
+    Syntax::Feature::Try::Handler->new(@_)->run();
 }
 
 1;
