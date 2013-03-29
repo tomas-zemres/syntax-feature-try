@@ -5,7 +5,7 @@ use warnings;
 use Import::Into;
 use Syntax::Feature::Try::Handler;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 our $PARSER = 'Syntax::Feature::Try';
 our $HANDLER = 'Syntax::Feature::Try::Handler';
 
@@ -53,10 +53,10 @@ Syntax::Feature::Try - try/catch/finally statement for exception handling
     use syntax 'try';
 
     try {
-        # run this code and handle errors 
+        # run this code and handle errors
     }
     catch (My::Class::Err $e) {
-        # handle exception based on class "My::Class::Err" 
+        # handle exception based on class "My::Class::Err"
     }
     catch ($e) {
         # handle other exceptions
@@ -176,14 +176,14 @@ because these blocks are internally called in different context.
 
 =back
 
-=head1 BUGS 
+=head1 BUGS
 
 =head1 SEE ALSO
 
 L<syntax> - Active syntax extensions
 
 L<Exception::Class> - A module that allows you to declare real exception
-classes in Perl 
+classes in Perl
 
 =head2 Other similar packages
 

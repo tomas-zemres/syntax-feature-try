@@ -55,7 +55,7 @@ static SV *parse_identifier(int allow_namespace) {
     SV *ident;
     char *end_ptr;
 
-    end_ptr = lex_buf_ptr; 
+    end_ptr = lex_buf_ptr;
     while (end_ptr < lex_buf_end) {
         if ( (*end_ptr == ':') && allow_namespace
              && (end_ptr+1 < lex_buf_end) && (end_ptr[1] == ':')
@@ -76,7 +76,7 @@ static SV *parse_identifier(int allow_namespace) {
     }
 
     ident = newSVpvn(lex_buf_ptr, end_ptr - lex_buf_ptr);
-    lex_read_to(end_ptr);    
+    lex_read_to(end_ptr);
     return ident;
 }
 
@@ -89,7 +89,7 @@ static OP *parse_code_block(char *inject_code) {
         return 0;
     }
 
-    // TODO better might be inject OPcode tree - instead of source-code 
+    // TODO better might be inject OPcode tree - instead of source-code
     if (inject_code) {
         DEBUG_MSG("Inject into block: %s\n", inject_code);
         lex_read_to(lex_buf_ptr+1);
@@ -114,7 +114,7 @@ void warn_on_unusual_class_name(char *name) {
             return;
         }
     }
-    
+
     warn("catch: lower case class-name '%s' may lead to confusion"
          " with perl keywords", name);
 }
@@ -153,7 +153,7 @@ static OP *parse_catch_args() {
 
     lex_read_space(0);
     if (!parse_char(')')) {
-        syntax_error("invalid catch syntax"); 
+        syntax_error("invalid catch syntax");
     }
 
     catch_block = parse_code_block(form("my $%s=shift;", SvPVbyte_nolen(var_name)));
@@ -170,7 +170,7 @@ static OP *parse_all_catch_blocks() {
     while (parse_keyword("catch")) {
         catch_args = parse_catch_args();
         catch_args = newANONLIST(catch_args);
-        
+
         catch_list = catch_list
                         ? op_append_elem(OP_LIST, catch_list, catch_args)
                         : newLISTOP(OP_LIST, 0, catch_args, NULL);

@@ -1,6 +1,6 @@
 Revision history for perl module Syntax::Feature::Try
 
-...    ???
+0.002   2013-03-29
 
     Update tests for "parse errors"
 
