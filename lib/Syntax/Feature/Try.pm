@@ -66,7 +66,7 @@ If it throws an error, then first I<catch block> (in order) that can handle
 thrown error will be executed. Other I<catch blocks> will be skipped.
 
 If none of I<catch blocks> can handle the error, it is thrown out of
-whole statement. It I<try block> doe not throw an error,
+whole statement. If I<try block> does not throw an error,
 all I<catch blocks> are skipped.
 
 =head2 catch error class
@@ -85,12 +85,13 @@ To catch all errors use syntax:
 
     catch ($e) { ... }
 
-Caught error is acessible inside I<catch block>
+Caught error is accessible inside I<catch block>
 via declared local variable C<$e>.
 
 =head2 rethrow error
 
-To rethrow caught error simple call "die $err".
+To rethrow caught error call "die $err".
+
 For example (log any Connection::Error):
 
     try { ... }
@@ -101,7 +102,7 @@ For example (log any Connection::Error):
 
 =head2 finally
 
-The L<finally block> is executed at the end of statement.
+The I<finally block> is executed at the end of statement.
 It is always executed (even if try or catch block throw an error).
 
     my $fh;
