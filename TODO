@@ -1,13 +1,6 @@
- - use keyword plugin api (get rid of Devel::CallParser dependency)
-        - keyword_plugin_function
-        - KEYWORD_PLUGIN_STMT
-
  - croak if "return/wantarray" is called inside try/catch/finally block
     -> similar for next,last,redo
     -> later: implement return from subrutine inside try/catch/finally blocks
-
- - cleanup module Syntax::Feature::Try
-        -> move parser into separate module
 
  - update stacktrace / caller ? 
 

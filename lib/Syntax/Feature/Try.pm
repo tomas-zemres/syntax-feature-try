@@ -2,40 +2,19 @@ package Syntax::Feature::Try;
 
 use strict;
 use warnings;
-use Import::Into;
+use XSLoader;
 use Syntax::Feature::Try::Handler;
 
 our $VERSION = '0.002';
-our $PARSER = 'Syntax::Feature::Try';
-our $HANDLER = 'Syntax::Feature::Try::Handler';
-
-sub install {
-    my ($class, %args) = @_;
-    my $target = $args{into};
-
-    $PARSER->import::into($target);
-}
-
-# TODO move following code to separate package ...::Parser
-use Carp;
-use Devel::CallParser;
-use XSLoader;
-use Exporter 'import';
-
-our @EXPORT = our @EXPORT_OK = qw/ try catch finally /;
 
 XSLoader::load();
 
-sub try {
-    $HANDLER->new(@_)->run();
+sub install {
+    $^H{"Syntax::Feature::Try/enabled"} = 1;
 }
 
-sub catch {
-    croak "syntax error: try/catch/finally block sequence";
-}
-
-sub finally {
-    croak "syntax error: finally without try block";
+sub uninstall {
+    $^H{"Syntax::Feature::Try/enabled"} = 0;
 }
 
 1;

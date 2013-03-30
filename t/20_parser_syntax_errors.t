@@ -55,7 +55,7 @@ describe "parser" => sub {
 
                     my $e;
                     catch ($e) { }
-                ], qr/^syntax error at \(eval \d+\) line 5/;
+                ], qr/^syntax error: try\/catch\/finally sequence at \(eval \d+\) line 5[.]?$/;
         };
 
         it "throws error if it is not followed by '('" => sub {

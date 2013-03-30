@@ -1,10 +1,15 @@
 Revision history for perl module Syntax::Feature::Try
 
+???     ...
+
+    - Use PL_keyword_plugin API instead of Devel::CallParser
+    - Implement unimport (no syntax 'try';)
+
 0.002   2013-03-29
 
-    Update tests for "parse errors"
+    - Update tests for "parse errors"
 
 0.001   2013-03-25
 
-    First public version of module for try/catch/finally statement
+    - First public version of module for try/catch/finally statement
 
