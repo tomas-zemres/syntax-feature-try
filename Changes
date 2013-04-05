@@ -1,6 +1,6 @@
 Revision history for perl module Syntax::Feature::Try
 
-???     ...
+0.003   2013-04-05
 
     - Implement unimport (no syntax 'try';)
     - Fix "finally" block to propagate exceptions thrown inside

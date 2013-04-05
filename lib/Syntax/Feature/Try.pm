@@ -8,7 +8,7 @@ use B::Hooks::OP::PPAddr;
 use Scalar::Util qw/ blessed /;
 
 BEGIN {
-    our $VERSION = '0.002';
+    our $VERSION = '0.003';
     XSLoader::load();
 }
 
