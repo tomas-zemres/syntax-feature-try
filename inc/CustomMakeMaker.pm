@@ -21,9 +21,12 @@ around _build_WriteMakefile_args => sub {
         B::Hooks::OP::Check
         B::Hooks::OP::PPAddr
     /);
-    return {%$args,
-        $depends->get_makefile_vars,
-    };
+    $args = {%$args, $depends->get_makefile_vars};
+
+    $args->{INC} .= " -Isrc";
+
+    #use Data::Dumper; warn Dumper($args);
+    return $args;
 };
 
 __PACKAGE__->meta->make_immutable;

@@ -10,8 +10,6 @@
  - rewrite documentation to English ;)
  - check TODOs in source-code
 
- - split Try.xs to more small files
-
  - do not use DESTROY for "finally" block, because it is called in different
     see Try::Tiny (Try::Tiny::ScopeGuard->DESTROY)
     test die in DESTROY / finally
