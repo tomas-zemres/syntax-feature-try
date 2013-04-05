@@ -9,5 +9,3 @@
  - implement keyword "rethrow" or simple use die?
  - rewrite documentation to English ;)
  - check TODOs in source-code
-
- - fix missing pTHX/aTHX in C-sources

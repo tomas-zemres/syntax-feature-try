@@ -15,7 +15,8 @@
 #define lex_next_char       ( lex_buf_len > 0 ? lex_buf_ptr[0] : 0 )
 #define lex_read(n)         lex_read_to(lex_buf_ptr + (n))
 
-static int parse_char(const char c) {
+#define parse_char(c)   my_parse_char(aTHX_ c)
+static int my_parse_char(pTHX_ const char c) {
     if (lex_next_char != c) {
         return 0;   // different character found
     }
@@ -25,7 +26,8 @@ static int parse_char(const char c) {
     return 1;
 }
 
-static int parse_keyword(char *keyword)
+#define parse_keyword(keyword)  my_parse_keyword(aTHX_ keyword)
+static int my_parse_keyword(pTHX_ char *keyword)
 {
     char *b_ptr, *kw_ptr;
 
@@ -46,7 +48,8 @@ static int parse_keyword(char *keyword)
     return 1;
 }
 
-static SV *parse_identifier(int allow_namespace) {
+#define parse_identifier(allow_ns)  my_parse_identifier(aTHX_ allow_ns)
+static SV *my_parse_identifier(pTHX_ int allow_namespace) {
     SV *ident;
     char *end_ptr;
 
@@ -89,7 +92,8 @@ static OP *my_op_check(pTHX_ OP *op, void *user_data) {
     return op;
 }
 
-static OP *parse_code_block(char *inject_code) {
+#define parse_code_block(inj_code)  my_parse_code_block(aTHX_ inj_code)
+static OP *my_parse_code_block(pTHX_ char *inject_code) {
     I32 floor;
     OP *ret_op;
     dXCPT;
@@ -125,7 +129,8 @@ static OP *parse_code_block(char *inject_code) {
     return ret_op;
 }
 
-static void warn_on_unusual_class_name(char *name) {
+#define warn_on_unusual_class_name(name)    my_warn_on_unusual_class_name(aTHX_ name)
+static void my_warn_on_unusual_class_name(pTHX_ char *name) {
     char *c;
 
     // do not warn if class-name contains ':' or any upper char
@@ -139,10 +144,10 @@ static void warn_on_unusual_class_name(char *name) {
          " with perl keywords", name);
 }
 
-static OP *parse_catch_args() {
+#define parse_catch_args()  my_parse_catch_args(aTHX)
+static OP *my_parse_catch_args(pTHX) {
     SV *class_name, *var_name;
     OP *catch_args, *catch_block;
-    static char inject_buf[1024];
 
     lex_read_space(0);
     if (!parse_char('(')) {
@@ -183,7 +188,8 @@ static OP *parse_catch_args() {
     return newLISTOP(OP_LIST, 0, catch_block, catch_args);
 }
 
-static OP *parse_all_catch_blocks() {
+#define parse_all_catch_blocks()    my_parse_all_catch_blocks(aTHX)
+static OP *my_parse_all_catch_blocks(pTHX) {
     OP *catch_list, *catch_args;
 
     catch_list = NULL;
@@ -198,7 +204,8 @@ static OP *parse_all_catch_blocks() {
     return catch_list;
 }
 
-static OP *parse_finally_block() {
+#define parse_finally_block()   my_parse_finally_block(aTHX)
+static OP *my_parse_finally_block(pTHX) {
     OP *finally_block;
 
     if (!parse_keyword("finally")) {
@@ -215,7 +222,8 @@ static OP *parse_finally_block() {
 /* build optree for:
  *  <MAIN_PKG>::_statement(@args);
  */
-static OP *build_statement_optree(OP *args) {
+#define build_statement_optree(args_op) my_build_statement_optree(aTHX_ args_op)
+static OP *my_build_statement_optree(pTHX_ OP *args_op) {
     HV *stash;
     GV *handler_gv;
     OP *call_op;
@@ -223,14 +231,14 @@ static OP *build_statement_optree(OP *args) {
     stash = gv_stashpv(MAIN_PKG, 0);
     handler_gv = gv_fetchmethod(stash, "_statement");
     call_op = newUNOP(OP_ENTERSUB, OPf_STACKED,
-            op_append_elem(OP_LIST, args,
+            op_append_elem(OP_LIST, args_op,
                 newGVOP(OP_GV, 0, handler_gv)
             )
         );
     return op_scope(call_op);
 }
 
-static OP *parse_try_statement()
+static OP *my_parse_try_statement(pTHX)
 {
     OP *try_block, *catch_list, *catch_args, *catch_block, *finally_block, *ret;
 

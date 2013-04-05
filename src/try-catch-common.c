@@ -1,7 +1,7 @@
 #include <perl.h>
 #include "try-catch-common.h"
 
-static void setup_constants() {
+static void my_setup_constants(pTHX) {
     HV *stash;
 
     hintkey_enabled_sv = newSVpvs_share(HINTKEY_ENABLED);

@@ -15,7 +15,8 @@
 
 static SV *hintkey_enabled_sv, *hintkey_block_sv;
 
-static void setup_constants();
+#define setup_constants()   my_setup_constants(aTHX)
+static void my_setup_constants(pTHX);
 
 /*** debug ***/
 

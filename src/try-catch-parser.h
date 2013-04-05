@@ -3,6 +3,7 @@
 
 #include <perl.h>
 
-static OP *parse_try_statement();
+#define parse_try_statement()   my_parse_try_statement(aTHX)
+static OP *my_parse_try_statement(pTHX);
 
 #endif /* __TRY_CATCH_PARSER__ */

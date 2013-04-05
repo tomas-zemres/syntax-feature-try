@@ -12,6 +12,7 @@
 #define is_syntax_enabled() \
         SvTRUE( get_cop_hint_value(PL_curcop, hintkey_enabled_sv) )
 
-static int is_inside_special_block();
+#define is_inside_special_block() my_is_inside_special_block(aTHX)
+static int my_is_inside_special_block(pTHX);
 
 #endif /* __TRY_CATCH_HINTS__ */

@@ -11,7 +11,7 @@ static PERL_CONTEXT* get_current_sub_context() {
     return NULL;
 }
 
-static int is_inside_special_block() {
+static int my_is_inside_special_block(pTHX) {
     const PERL_CONTEXT * const cx = get_current_sub_context();
 
     return !cx || SvTRUE(get_stack_block_hint(cx));
