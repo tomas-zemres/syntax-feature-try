@@ -5,7 +5,7 @@ use warnings;
 use XSLoader;
 use B::Hooks::OP::Check;
 use B::Hooks::OP::PPAddr;
-use Syntax::Feature::Try::Handler;
+use Scalar::Util qw/ blessed /;
 
 our $VERSION = '0.002';
 
@@ -20,7 +20,60 @@ sub uninstall {
 }
 
 sub _statement {
-    Syntax::Feature::Try::Handler->new(@_)->run();
+    my ($try_block, $catch_list, $finally_block) = @_;
+
+    local $@;
+    eval {
+        BEGIN { $^H{'Syntax::Feature::Try/block'} = 'try' }
+        $try_block->();
+    };
+    my $exception = $@;
+    if ($exception) {
+        my $handler = _get_exception_handler($exception, $catch_list);
+        if ($handler) {
+            eval {
+                BEGIN { $^H{'Syntax::Feature::Try/block'} = 'catch' }
+                $handler->($exception);
+            };
+            $exception = $@;
+        }
+    }
+
+    if ($finally_block) {
+        {
+            BEGIN { $^H{'Syntax::Feature::Try/block'} = 'finally' }
+            $finally_block->();
+        }
+    }
+
+    if ($exception) {
+        _rethrow($exception);
+    }
+}
+
+sub _get_exception_handler {
+    my ($exception, $catch_list) = @_;
+
+    foreach my $item (@{ $catch_list }) {
+        my ($handler, @args) = @$item;
+        return $handler if _exception_match_args($exception, @args);
+    }
+}
+
+sub _exception_match_args {
+    my ($exception, $className) = @_;
+
+    if (defined $className) {
+        return 0 if not blessed($exception);
+        return 0 if not $exception->isa($className);
+    }
+    return 1;   # without args catch all exceptions
+}
+
+sub _rethrow {
+    my ($exception) = @_;
+    local $SIG{__DIE__} = undef;
+    die $exception;
 }
 
 1;
