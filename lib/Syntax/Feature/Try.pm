@@ -19,7 +19,7 @@ sub uninstall {
     $^H{HINTKEY_ENABLED()} = 0;
 }
 
-sub _handler {
+sub _statement {
     Syntax::Feature::Try::Handler->new(@_)->run();
 }
 

@@ -1,5 +1,5 @@
 use Test::Spec;
-use Syntax::Feature::Try::Handler;
+use Syntax::Feature::Try;
 
 use FindBin qw/ $Bin /;
 use lib "$Bin/lib";
@@ -9,11 +9,8 @@ describe "code without finally block" => sub {
     my (@parsed, @catch);
 
     it "can be compiled" => sub {
-        Syntax::Feature::Try::Handler->expects('new')->returns(sub {
-                my ($local_class, @args) = @_;
-
-                @parsed = @args;
-                return stub(run => sub{});
+        Syntax::Feature::Try->expects('_statement')->returns(sub {
+                @parsed = @_;
             });
 
         compile_ok q[
@@ -62,11 +59,8 @@ describe "code try/finally" => sub {
     my (@parsed, @catch);
 
     it "can be compiled" => sub {
-        Syntax::Feature::Try::Handler->expects('new')->returns(sub {
-                my ($local_class, @args) = @_;
-
-                @parsed = @args;
-                return stub(run => sub{});
+        Syntax::Feature::Try->expects('_statement')->returns(sub {
+                @parsed = @_;
             });
 
         compile_ok q[
@@ -95,11 +89,8 @@ describe "code try/catch/finally" => sub {
     my (@parsed, @catch);
 
     it "can be compiled" => sub {
-        Syntax::Feature::Try::Handler->expects('new')->returns(sub {
-                my ($local_class, @args) = @_;
-
-                @parsed = @args;
-                return stub(run => sub{});
+        Syntax::Feature::Try->expects('_statement')->returns(sub {
+                @parsed = @_;
             });
 
         compile_ok q[

@@ -213,7 +213,7 @@ static OP *parse_finally_block() {
 }
 
 /* build optree for:
- *  <MAIN_PKG>::_handler(@args);
+ *  <MAIN_PKG>::_statement(@args);
  */
 static OP *build_statement_optree(OP *args) {
     HV *stash;
@@ -221,7 +221,7 @@ static OP *build_statement_optree(OP *args) {
     OP *call_op;
 
     stash = gv_stashpv(MAIN_PKG, 0);
-    handler_gv = gv_fetchmethod(stash, "_handler");
+    handler_gv = gv_fetchmethod(stash, "_statement");
     call_op = newUNOP(OP_ENTERSUB, OPf_STACKED,
             op_append_elem(OP_LIST, args,
                 newGVOP(OP_GV, 0, handler_gv)
