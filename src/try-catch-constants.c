@@ -1,5 +1,5 @@
 #include <perl.h>
-#include "try-catch-common.h"
+#include "try-catch-constants.h"
 
 static void my_setup_constants(pTHX) {
     HV *stash;

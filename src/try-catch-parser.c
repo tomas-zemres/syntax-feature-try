@@ -5,9 +5,21 @@
 #define NO_XSLOCKS
 #include <XSUB.h>
 
-#include "try-catch-common.h"
+#include "try-catch-constants.h"
 #include "try-catch-parser.h"
 #include "try-catch-hints.h"
+
+/*** debug ***/
+
+#ifdef TRY_PARSER_DEBUG
+    #include <perlio.h>
+    #define DEBUG_MSG(fmt...)   PerlIO_printf(PerlIO_stderr(), "TRY_PARSER_DEBUG: " fmt)
+#else
+    #define DEBUG_MSG(fmt...)
+#endif
+
+/*** error reporting ***/
+#define syntax_error(msg)   croak("syntax error: %s", msg)
 
 #define lex_buf_ptr         ( PL_parser->bufptr )
 #define lex_buf_end         ( PL_parser->bufend )
