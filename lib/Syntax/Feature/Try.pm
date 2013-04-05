@@ -7,16 +7,17 @@ use B::Hooks::OP::Check;
 use B::Hooks::OP::PPAddr;
 use Scalar::Util qw/ blessed /;
 
-our $VERSION = '0.002';
-
-XSLoader::load();
+BEGIN {
+    our $VERSION = '0.002';
+    XSLoader::load();
+}
 
 sub install {
-    $^H{HINTKEY_ENABLED()} = 1;
+    $^H{+HINTKEY_ENABLED} = 1;
 }
 
 sub uninstall {
-    $^H{HINTKEY_ENABLED()} = 0;
+    $^H{+HINTKEY_ENABLED} = 0;
 }
 
 sub _statement {
@@ -24,7 +25,7 @@ sub _statement {
 
     local $@;
     eval {
-        BEGIN { $^H{'Syntax::Feature::Try/block'} = 'try' }
+        BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_TRY }
         $try_block->();
     };
     my $exception = $@;
@@ -32,7 +33,7 @@ sub _statement {
         my $handler = _get_exception_handler($exception, $catch_list);
         if ($handler) {
             eval {
-                BEGIN { $^H{'Syntax::Feature::Try/block'} = 'catch' }
+                BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_CATCH }
                 $handler->($exception);
             };
             $exception = $@;
@@ -41,7 +42,7 @@ sub _statement {
 
     if ($finally_block) {
         {
-            BEGIN { $^H{'Syntax::Feature::Try/block'} = 'finally' }
+            BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_FINALLY }
             $finally_block->();
         }
     }
