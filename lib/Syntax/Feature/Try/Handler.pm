@@ -15,14 +15,6 @@ sub new {
     return bless($self, $class);
 }
 
-sub DESTROY {
-    my ($self) = @_;
-
-    return if not $self->{finally_block};
-    BEGIN { $^H{'Syntax::Feature::Try/block'} = 'finally' }
-    $self->{finally_block}->();
-}
-
 sub run {
     my ($self) = @_;
 
@@ -31,13 +23,27 @@ sub run {
         BEGIN { $^H{'Syntax::Feature::Try/block'} = 'try' }
         $self->{try_block}->();
     };
-    if ($@) {
-        my $exception = $@;
+    my $exception = $@;
+    if ($exception) {
         my $handler = $self->get_exception_handler($exception);
+        if ($handler) {
+            eval {
+                BEGIN { $^H{'Syntax::Feature::Try/block'} = 'catch' }
+                $handler->($exception);
+            };
+            $exception = $@;
+        }
+    }
 
-        BEGIN { $^H{'Syntax::Feature::Try/block'} = 'catch' }
-        $handler ? $handler->($exception)
-                 : $self->rethrow($exception);
+    if ($self->{finally_block}) {
+        {
+            BEGIN { $^H{'Syntax::Feature::Try/block'} = 'finally' }
+            $self->{finally_block}->();
+        }
+    }
+
+    if ($exception) {
+        $self->rethrow($exception);
     }
 }
 

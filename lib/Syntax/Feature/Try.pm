@@ -120,6 +120,9 @@ It is always executed (even if try or catch block throw an error).
         $fh->close;
     }
 
+B<WARNING>: If finally block throws an exception,
+originaly thrown exception (from try/catch block) is discarded.
+
 =head1 Exception::Class
 
 This module is compatible with Exception::Class

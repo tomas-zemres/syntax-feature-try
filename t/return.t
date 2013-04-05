@@ -30,8 +30,7 @@ describe "keyword return" => sub {
         ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 6[.]?$/;
     };
 
-    xit "throws syntax error if it is used inside finally block" => sub {
-        return local $TODO = "Fix finally block - do not use DESTROY";
+    it "throws syntax error if it is used inside finally block" => sub {
         test_syntax_error q[
             use syntax 'try';
 

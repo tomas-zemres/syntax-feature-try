@@ -1,6 +1,10 @@
 use Test::Spec;
 use Test::Exception;
-use Exception::Class 'MyTestErr';
+use Exception::Class qw/
+    MyTestErr
+    MyTestErr::A
+    MyTestErr::B
+/;
 
 use syntax 'try';
 
@@ -46,6 +50,73 @@ describe "finally" => sub {
             catch ($e) { MyTestErr->throw }
             finally { $mock->cleanup_code; }
         } 'MyTestErr';
+    };
+
+    it "it propagate throwed exception" => sub {
+        my $mock = mock();
+        $mock->expects('try_called');
+
+        throws_ok {
+            try { $mock->try_called }
+            finally { MyTestErr->throw }
+        } 'MyTestErr';
+    };
+
+    it "it override throwed exception from catch block" => sub {
+        my $mock = mock();
+        $mock->expects('catch_called');
+
+        throws_ok {
+            try { die 123; }
+            catch ($e) {
+                $mock->catch_called;
+                MyTestErr::A->throw;
+            }
+            finally { die MyTestErr::B->throw }
+        } 'MyTestErr::B';
+    };
+
+    it "is called in right order" => sub {
+        my @order;
+
+        lives_ok {
+            push @order, 'before';
+            try {
+                push @order, 'try-out-1';
+                try {
+                    push @order, 'try-in-1';
+                    MyTestErr::A->throw;
+                    push @order, 'try-in-2';
+                }
+                catch (MyTestErr::A $e) {
+                    push @order, 'catch-in-1';
+                    MyTestErr::B->throw;
+                    push @order, 'catch-in-2';
+                }
+                finally {
+                    push @order, 'finally-in';
+                }
+                push @order, 'try-in-2';
+            }
+            catch (MyTestErr::B $e) {
+                push @order, 'catch-out';
+            }
+            finally {
+                push @order, 'finally-out';
+            }
+            push @order, 'after';
+        };
+
+        is_deeply(\@order, [qw/
+            before
+            try-out-1
+            try-in-1
+            catch-in-1
+            finally-in
+            catch-out
+            finally-out
+            after
+        /]);
     };
 };
 

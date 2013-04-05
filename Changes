@@ -2,6 +2,8 @@ Revision history for perl module Syntax::Feature::Try
 
 ???     ...
 
+    - Fix "finally" block to propagate exceptions thrown inside
+    - Raise error if "return" is called inside try/catch/finally block
     - Use PL_keyword_plugin API instead of Devel::CallParser
     - Implement unimport (no syntax 'try';)
 
