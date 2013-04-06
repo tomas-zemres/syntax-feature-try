@@ -6,8 +6,5 @@
 
  - test usage in different module that it is used
 
- - implement keyword "rethrow" or simple use die?
  - rewrite documentation to English ;)
  - check TODOs in source-code
-
- - add test with overriden $SIG{__DIE__};
