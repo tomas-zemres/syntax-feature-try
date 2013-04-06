@@ -26,7 +26,7 @@ sub _statement {
     local $@;
     eval {
         BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_TRY }
-        $try_block->();
+        run_block(\&$try_block);
     };
     my $exception = $@;
     if ($exception) {
@@ -34,7 +34,7 @@ sub _statement {
         if ($handler) {
             eval {
                 BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_CATCH }
-                $handler->($exception);
+                run_block(\&$handler, $exception);
             };
             $exception = $@;
         }
@@ -43,7 +43,7 @@ sub _statement {
     if ($finally_block) {
         {
             BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_FINALLY }
-            $finally_block->();
+            run_block(\&$finally_block);
         }
     }
 
@@ -171,11 +171,22 @@ It is always executed (even if try or catch block throw an error).
         ...
     }
     finally {
-        $fh->close;
+        $fh->close if $fh;
     }
 
 B<WARNING>: If finally block throws an exception,
 originaly thrown exception (from try/catch block) is discarded.
+You can convert errors inside finally block to warnings:
+
+    try {
+        # try block
+    }
+    finally {
+        try {
+            # cleanup code
+        }
+        catch ($e) { warn $e }
+    }
 
 =head1 Exception::Class
 
@@ -201,11 +212,6 @@ This module is compatible with Exception::Class
 C<@_> is not accessible inside try/catch/finally blocks,
 because these blocks are internally called in different context.
 
-=head2 return, wantarray
-
-C<return> and C<wantarray> is not working inside try/catch/finally blocks,
-because these blocks are internally called in different context.
-
 =head2 next, last, redo
 
 C<next>, C<last> and C<redo> is not working inside try/catch/finally blocks,
@@ -215,7 +221,7 @@ because these blocks are internally called in different context.
 
 =over
 
-=item return, wantarray, ...
+=item return, ...
 
 =back
 

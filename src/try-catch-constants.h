@@ -13,6 +13,7 @@
 #define BLOCK_CATCH     2
 #define BLOCK_FINALLY   3
 
+static HV *internal_stash;
 static SV *hintkey_enabled_sv, *hintkey_block_sv;
 
 #define setup_constants()   my_setup_constants(aTHX)

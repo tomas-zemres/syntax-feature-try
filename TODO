@@ -1,6 +1,6 @@
- - croak if "return/wantarray" is called inside try/catch/finally block
-    -> similar for next,last,redo
-    -> later: implement return from subrutine inside try/catch/finally blocks
+ - fix problems inside try/catch/finally block
+    -> loop ops: next,last,redo
+    -> later: implement return from subroutine inside try/catch/finally blocks
 
  - update stacktrace / caller ? 
 
@@ -9,3 +9,5 @@
  - implement keyword "rethrow" or simple use die?
  - rewrite documentation to English ;)
  - check TODOs in source-code
+
+ - add test with overriden $SIG{__DIE__};

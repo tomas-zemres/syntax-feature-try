@@ -32,7 +32,7 @@ static int my_keyword_plugin(pTHX_ char *keyword_ptr, STRLEN keyword_len,
 
 MODULE = Syntax::Feature::Try  PACKAGE = Syntax::Feature::Try
 
-PROTOTYPES: DISABLE
+PROTOTYPES: DISABLED
 
 BOOT:
 {
@@ -42,3 +42,27 @@ BOOT:
     PL_keyword_plugin = my_keyword_plugin;
 }
 
+void
+run_block(SV* coderef, SV* arg1=NULL)
+    CODE:
+    {
+        dSP;
+        PERL_CONTEXT *upper_sub_cx;
+        I32 gimme;
+
+        upper_sub_cx = get_sub_context(1);
+        gimme = upper_sub_cx ? upper_sub_cx->blk_gimme : 0;
+
+        ENTER;
+        SAVETMPS;
+
+        PUSHMARK(SP);
+        if (SvTRUE(arg1)) {
+            XPUSHs(arg1);
+        }
+        PUTBACK;
+        call_sv(coderef, gimme | G_DISCARD);
+
+        FREETMPS;
+        LEAVE;
+    }

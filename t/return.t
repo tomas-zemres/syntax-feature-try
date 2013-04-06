@@ -60,7 +60,7 @@ describe "keyword return" => sub {
         ];
     };
 
-    it "can be used inside subrutines defined in try/catch/finally blocks" => sub {
+    it "can be used inside subroutines defined in try/catch/finally blocks" => sub {
         my @result = compile_ok q[
             use syntax 'try';
 
