@@ -8,6 +8,7 @@
 #include "try-catch-stack.c"
 #include "try-catch-hints.c"
 #include "try-catch-parser.c"
+#include "try-catch-optree.c"
 
 /* setup keyword plugin */
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);

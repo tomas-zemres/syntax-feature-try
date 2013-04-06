@@ -43,6 +43,26 @@ describe "keyword return" => sub {
         ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 7[.]?$/;
     };
 
+    it "throws syntax error if it is used inside block in nested context" => sub {
+        test_syntax_error q[
+            use syntax 'try';
+
+            try {
+                for (my $i=0; $i < 10; $i++) {
+                    do {
+                        if ($i == 5) {
+                            do {
+                                return 55;
+                            }
+                        }
+                    }
+                }
+            }
+            finally { }
+
+        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 5[.]?$/;
+    };
+
     it "can be used outside try/finally blocks" => sub {
         compile_ok q[
             use syntax 'try';
