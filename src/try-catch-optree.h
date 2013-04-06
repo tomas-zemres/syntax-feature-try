@@ -5,6 +5,9 @@
 
 #define build_const_sv_op(sv)  newSVOP(OP_CONST, 0, (sv))
 
+#define build_block_content_op(orig_content_op) \
+        op_append_elem(OP_LINESEQ, (orig_content_op), newOP(OP_UNDEF, 0))
+
 #define build_catch_args_optree(block_op, class_name_sv) \
         my_build_catch_args_optree(aTHX_ block_op, class_name_sv)
 static OP* my_build_catch_args_optree(pTHX_ OP* block_op, SV* class_name_sv);

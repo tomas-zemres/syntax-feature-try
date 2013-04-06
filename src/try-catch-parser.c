@@ -108,7 +108,7 @@ static OP *my_op_check(pTHX_ OP *op, void *user_data) {
 #define parse_code_block(inj_code)  my_parse_code_block(aTHX_ inj_code)
 static OP *my_parse_code_block(pTHX_ char *inject_code) {
     I32 floor;
-    OP *ret_op;
+    OP *content_op, *ret_op;
     dXCPT;
     hook_op_check_id check_id_return;
 
@@ -129,7 +129,8 @@ static OP *my_parse_code_block(pTHX_ char *inject_code) {
 
     XCPT_TRY_START {
         floor = start_subparse(0, CVf_ANON);
-        ret_op = newANONSUB(floor, NULL, parse_block(0));
+        content_op = build_block_content_op(parse_block(0));
+        ret_op = newANONSUB(floor, NULL, content_op);
     } XCPT_TRY_END
 
     // finally remove op-checks
