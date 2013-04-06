@@ -29,7 +29,7 @@ sub _statement {
         run_block(\&$try_block);
     };
     my $exception = $@;
-    if ($exception) {
+    if ($exception and $catch_list) {
         my $handler = _get_exception_handler($exception, $catch_list);
         if ($handler) {
             eval {

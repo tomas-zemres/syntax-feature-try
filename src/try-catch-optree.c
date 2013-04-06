@@ -1,6 +1,8 @@
 #include "try-catch-constants.h"
 #include "try-catch-optree.h"
 
+#include <perl.h>
+
 /* build optree for catch call arguments:
  *  ( $block_ref, $class_name )
  *  or
@@ -22,7 +24,10 @@ static OP *my_build_statement_optree(pTHX_
     GV *handler_gv;
     OP *args_op, *call_op;
 
-    args_op = newLISTOP(OP_LIST, 0, try_block_op, newANONLIST(catch_list_op));
+    catch_list_op = catch_list_op ? newANONLIST(catch_list_op)
+                                  : newOP(OP_UNDEF, 0);
+
+    args_op = newLISTOP(OP_LIST, 0, try_block_op, catch_list_op);
     args_op = op_append_elem(OP_LIST, args_op, finally_block_op);
 
     handler_gv = gv_fetchmethod(internal_stash, "_statement");
