@@ -1,66 +1,231 @@
 use Test::Spec;
 
+use 5.010;
 use FindBin qw/ $Bin /;
 use lib "$Bin/lib";
 use test_tools qw/ test_syntax_error compile_ok /;
 
+use Exception::Class 'Error1';
+use syntax 'try';
 
-describe "keyword return" => sub {
-    it "throws syntax error if it is used inside try block" => sub {
-        test_syntax_error q[
-            use syntax 'try';
 
-            try {
-                return 55;
-            }
-            catch (Mock::Err $e) { }
+my @RET_TYPES = qw/ array list scalar undef none /;
 
-        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 5[.]?$/;
+sub mock_return {
+    my $mode = shift;
+    given ($mode) {
+        when ('array') {
+            my @a = qw/ aa bb cc dd /;
+            return @a;
+        }
+        when ('list') {
+            return (444,666,777);
+        }
+        when ('scalar') {
+            return 53.3;
+        }
+        when ('undef') {
+            return undef;
+        }
+        default {
+            return;
+        }
+    }
+}
+
+describe "return" => sub {
+
+    describe "from mock function" => sub {
+        it "is ok" => sub {
+            is_deeply([ mock_return('array') ], [qw/ aa bb cc dd /]);
+            is_deeply(scalar mock_return('array'), 4);
+
+            is_deeply([ mock_return('list') ], [qw/ 444 666 777 /]);
+            is_deeply(scalar(mock_return('list')), 777);
+
+            is_deeply([ mock_return('scalar') ], [53.3]);
+            is_deeply(scalar mock_return('scalar'), 53.3);
+
+            is_deeply([ mock_return('undef') ], [undef]);
+            is_deeply(scalar mock_return('undef'), undef);
+
+            is_deeply([ mock_return('none') ], []);
+            is_deeply(scalar mock_return('none'), undef);
+        };
     };
 
-    it "throws syntax error if it is used inside catch block" => sub {
-        test_syntax_error q[
-            use syntax 'try';
+    describe "from try block" => sub {
+        it "works ok" => sub {
+            our @done = ();
 
-            try { die bless {}, "Mock::Err" }
-            catch (Mock::Err $e) {
-                return 66;
+            sub test_return_try {
+                my ($x) = @_;
+
+                push @done, 'before';
+                try {
+                    push @done, 'try-1';
+                    return 66;
+
+                    push @done, 'try-2';
+                }
+                catch (Error1 $e) {
+                    push @done, 'catch';
+                    return 77;
+                }
+                finally {
+                    push @done, 'finally';
+                }
+                return 88;
             }
 
-        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 6[.]?$/;
+            is_deeply(test_return_try(), 66);
+
+            is_deeply(\@done, [qw/ before try-1 finally /]);
+        };
+
+        it "works in all contexts" => sub {
+            sub test_try_context {
+                my $mode = shift;
+                try {
+                    return mock_return($mode);
+                }
+                finally { }
+                return -5;
+            }
+
+            for (@RET_TYPES) {
+                is_deeply(scalar test_try_context($_), scalar mock_return($_));
+                is_deeply([test_try_context($_)], [mock_return($_)]);
+                test_try_context($_); # void context
+            }
+        };
     };
 
-    it "throws syntax error if it is used inside finally block" => sub {
-        test_syntax_error q[
-            use syntax 'try';
+    describe "from catch block" => sub {
+        it "works inside catch block" => sub {
+            our @done = ();
 
-            try {
-            }
-            finally {
-                return 77;
+            sub test_return_catch {
+                my ($x) = @_;
+
+                push @done, 'before';
+                try {
+                    push @done, 'try-1';
+                    Error1->throw;
+
+                    push @done, 'try-2';
+                    return 66;
+                }
+                catch (Error1 $e) {
+                    push @done, 'catch';
+                    return 77;
+                }
+                finally {
+                    push @done, 'finally';
+                }
+                return 88;
             }
 
-        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 7[.]?$/;
+            is_deeply(test_return_catch(), 77);
+
+            is_deeply(\@done, [qw/ before try-1 catch finally /]);
+        };
+
+        it "works in all contexts" => sub {
+            sub test_catch_context {
+                my $mode = shift;
+                try { Error1->throw }
+                catch (Error1 $err) {
+                    return mock_return($mode);
+                }
+                return -5;
+            }
+
+            for (@RET_TYPES) {
+                is_deeply(scalar test_catch_context($_), scalar mock_return($_));
+                is_deeply([test_catch_context($_)], [mock_return($_)]);
+                test_catch_context($_); # void context
+            }
+        };
     };
 
-    it "throws syntax error if it is used inside block in nested context" => sub {
-        test_syntax_error q[
-            use syntax 'try';
+    describe "from finally block" => sub {
+        it "works ok" => sub {
+            our @done = ();
 
+            sub test_return_finally {
+                my ($x) = @_;
+
+                push @done, 'before';
+                try {
+                    push @done, 'try-1';
+                    Error1->throw;
+                    return 66;
+                }
+                catch (Error1 $e) {
+                    push @done, 'catch';
+                }
+                finally {
+                    push @done, 'finally';
+                    return 99;
+                }
+                return 88;
+            }
+
+            is_deeply(test_return_finally(), 99);
+
+            is_deeply(\@done, [qw/ before try-1 catch finally /]);
+        };
+
+        it "overrides prevoiusly returned values" => sub {
+            sub test_override_return {
+                my $mode = shift;
+                try {
+                    Error1->throw if $mode eq 'err';
+                    return 44;
+                }
+                catch (Error1 $e) {
+                    return 55;
+                }
+                finally {
+                    return 66;
+                }
+                return 99;
+            }
+
+            is(test_override_return('err'), 66);
+            is(test_override_return('ok'), 66);
+        };
+    };
+
+    it "works for nested blocks structures" => sub {
+        sub test_nested_blocks {
+            my $mode = shift;
             try {
-                for (my $i=0; $i < 10; $i++) {
-                    do {
-                        if ($i == 5) {
-                            do {
-                                return 55;
-                            }
-                        }
+                for (1..3) {
+                    try {
+                        Error1->throw if $mode eq 'ERROR';
+                        return mock_return($mode) if $mode;
+                    }
+                    finally {
                     }
                 }
             }
-            finally { }
+            catch (Error1 $e) {
+                return 67;
+            }
+            return 5;
+        }
 
-        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line 5[.]?$/;
+        for (@RET_TYPES) {
+            is_deeply(scalar test_nested_blocks($_), scalar mock_return($_));
+            is_deeply([test_nested_blocks($_)], [mock_return($_)]);
+            test_nested_blocks($_); # void context
+        }
+
+        is_deeply(scalar test_nested_blocks('ERROR'), 67);
+        is_deeply([test_nested_blocks('ERROR')], [qw/ 67 /]);
+        test_nested_blocks('ERROR'); # void context
     };
 
     it "can be used outside try/finally blocks" => sub {
@@ -124,33 +289,6 @@ describe "keyword return" => sub {
                 return 99;
             }
         ];
-    };
-
-    it "can be used inside used modules used in try/catch/finally blocks" => sub {
-        compile_ok q[
-            use syntax 'try';
-
-            try {
-                use mock_module;
-
-                die bless {}, "Mock::Err";
-            }
-            catch (Mock::Err $e) {
-                use mock_module;
-            }
-        ];
-    };
-
-    xit "cannot be used inside file required in try/catch/finally blocks" => sub {
-        return local $TODO = "Fix this problem";
-        test_syntax_error q[
-            use syntax 'try';
-
-            try {
-                require 'mock_return.pl';
-            }
-            catch (Mock::Err $e) {}
-        ], qr/^syntax error: return inside try\/catch\/finally blocks is not working at \(eval \d+\) line XX[.]?$/;;
     };
 };
 

@@ -1,9 +1,4 @@
 #include <perl.h>
-#include <hook_op_check.h>
-#include <hook_op_ppaddr.h>
-
-#define NO_XSLOCKS
-#include <XSUB.h>
 
 #include "try-catch-constants.h"
 #include "try-catch-parser.h"
@@ -91,26 +86,11 @@ static SV *my_parse_identifier(pTHX_ int allow_namespace) {
     return ident;
 }
 
-static OP* my_before_return(pTHX_ OP *op, void *user_data) {
-    if (is_inside_special_block()) {
-        syntax_error("return inside try/catch/finally blocks is not working");
-    }
-    return op;
-}
-
-static OP *my_op_check(pTHX_ OP *op, void *user_data) {
-    if (is_syntax_enabled() && (op->op_type == OP_RETURN)) {
-        hook_op_ppaddr_around(op, my_before_return, NULL, NULL);
-    }
-    return op;
-}
-
 #define parse_code_block(inj_code)  my_parse_code_block(aTHX_ inj_code)
 static OP *my_parse_code_block(pTHX_ char *inject_code) {
     I32 floor;
     OP *content_op, *ret_op;
     dXCPT;
-    hook_op_check_id check_id_return;
 
     lex_read_space(0);
     if (lex_next_char != '{') {
@@ -125,18 +105,9 @@ static OP *my_parse_code_block(pTHX_ char *inject_code) {
         lex_stuff_pvs("{", 0);
     }
 
-    check_id_return = hook_op_check(OP_RETURN, my_op_check, NULL);
-
-    XCPT_TRY_START {
-        floor = start_subparse(0, CVf_ANON);
-        content_op = build_block_content_op(parse_block(0));
-        ret_op = newANONSUB(floor, NULL, content_op);
-    } XCPT_TRY_END
-
-    // finally remove op-checks
-    hook_op_check_remove(OP_RETURN, check_id_return);
-
-    XCPT_CATCH { XCPT_RETHROW; }
+    floor = start_subparse(0, CVf_ANON);
+    content_op = build_block_content_op(parse_block(0));
+    ret_op = newANONSUB(floor, NULL, content_op);
 
     DEBUG_MSG("{ ... }\n");
     lex_read_space(0);

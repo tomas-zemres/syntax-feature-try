@@ -43,27 +43,52 @@ BOOT:
     PL_keyword_plugin = my_keyword_plugin;
 }
 
-void
+SV*
 run_block(SV* coderef, SV* arg1=NULL)
     CODE:
-    {
         dSP;
         PERL_CONTEXT *upper_sub_cx;
-        I32 gimme;
+        I32 gimme, ret_count, i;
+        AV* ret_av;
+        SV* ret_av_ref = &PL_sv_undef;
 
         upper_sub_cx = get_sub_context(1);
         gimme = upper_sub_cx ? upper_sub_cx->blk_gimme : 0;
 
+        // undef $end_of_block;
+        sv_setsv(get_sv(VAR_NAME_end_of_block, 0), &PL_sv_undef);
+
         ENTER;
         SAVETMPS;
 
+        // Call arguments: arg1
         PUSHMARK(SP);
         if (SvTRUE(arg1)) {
             XPUSHs(arg1);
         }
         PUTBACK;
-        call_sv(coderef, gimme | G_DISCARD);
+        ret_count = call_sv(coderef, gimme);
+
+        SPAGAIN;
+        // TODO extract to function
+        // if return called inside block:
+        if (!SvTRUE(get_sv(VAR_NAME_end_of_block, 0))) {
+            ret_av = newAV();
+            av_extend(ret_av, ret_count-1);
+            for (i=ret_count-1; i >= 0; i--) {
+                SV *item = (SV*)POPs;
+                if (!av_store(ret_av, i, SvREFCNT_inc(item))) {
+                    SvREFCNT_dec(item);
+                    croak(MAIN_PKG " internal error - push return values");
+                }
+            }
+            ret_av_ref = newRV_noinc((SV*)ret_av);
+        }
+        PUTBACK;
 
         FREETMPS;
         LEAVE;
-    }
+
+        RETVAL = ret_av_ref;
+    OUTPUT:
+        RETVAL

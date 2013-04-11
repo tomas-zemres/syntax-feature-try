@@ -16,14 +16,7 @@ around _build_WriteMakefile_args => sub {
         $args->{DEFINE} .= " -D$key";
     }
 
-    my $depends = ExtUtils::Depends->new(qw/
-        Syntax::Feature::Try
-        B::Hooks::OP::Check
-        B::Hooks::OP::PPAddr
-    /);
-    $args = {%$args, $depends->get_makefile_vars};
-
-    $args->{INC} .= " -Isrc";
+    $args->{INC} = ($args->{INC} || "") . " -Isrc";
 
     #use Data::Dumper; warn Dumper($args);
     return $args;

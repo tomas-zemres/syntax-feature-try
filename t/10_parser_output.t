@@ -11,6 +11,7 @@ describe "code without finally block" => sub {
     it "can be compiled" => sub {
         Syntax::Feature::Try->expects('_statement')->returns(sub {
                 @parsed = @_;
+                undef;
             });
 
         compile_ok q[
@@ -61,6 +62,7 @@ describe "code try/finally" => sub {
     it "can be compiled" => sub {
         Syntax::Feature::Try->expects('_statement')->returns(sub {
                 @parsed = @_;
+                undef;
             });
 
         compile_ok q[
@@ -87,6 +89,7 @@ describe "code try/catch/finally" => sub {
     it "can be compiled" => sub {
         Syntax::Feature::Try->expects('_statement')->returns(sub {
                 @parsed = @_;
+                undef;
             });
 
         compile_ok q[

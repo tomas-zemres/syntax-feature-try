@@ -1,6 +1,5 @@
- - fix problems inside try/catch/finally block
+ - check/fix problems inside try/catch/finally block
     -> loop ops: next,last,redo
-    -> later: implement return from subroutine inside try/catch/finally blocks
 
  - update stacktrace / caller ? 
 
