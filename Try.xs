@@ -1,12 +1,11 @@
 #include <EXTERN.h>
 #include <perl.h>
-
-#define NO_XSLOCKS
 #include <XSUB.h>
+
+#include "try-catch-hints.h"
 
 #include "try-catch-constants.c"
 #include "try-catch-stack.c"
-#include "try-catch-hints.c"
 #include "try-catch-parser.c"
 #include "try-catch-optree.c"
 

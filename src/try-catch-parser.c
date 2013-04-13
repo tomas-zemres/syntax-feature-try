@@ -2,7 +2,6 @@
 
 #include "try-catch-constants.h"
 #include "try-catch-parser.h"
-#include "try-catch-hints.h"
 #include "try-catch-optree.h"
 
 /*** debug ***/
@@ -90,7 +89,6 @@ static SV *my_parse_identifier(pTHX_ int allow_namespace) {
 static OP *my_parse_code_block(pTHX_ char *inject_code) {
     I32 floor;
     OP *content_op, *ret_op;
-    dXCPT;
 
     lex_read_space(0);
     if (lex_next_char != '{') {

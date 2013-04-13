@@ -30,7 +30,6 @@ sub _statement {
     local $@;
     # TODO deduplicate try/catch/finally blocks code
     eval {
-        BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_TRY }
         $return = run_block(\&$try_block);
     };
     my $exception = $@;
@@ -38,7 +37,6 @@ sub _statement {
         my $handler = _get_exception_handler($exception, $catch_list);
         if ($handler) {
             eval {
-                BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_CATCH }
                 $return = run_block(\&$handler, $exception);
             };
             $exception = $@;
@@ -47,7 +45,6 @@ sub _statement {
 
     if ($finally_block) {
         {
-            BEGIN { $^H{+HINTKEY_BLOCK} = BLOCK_FINALLY }
             $return = run_block(\&$finally_block) || $return;
         }
     }
