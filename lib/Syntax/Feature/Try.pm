@@ -121,7 +121,9 @@ Syntax::Feature::Try - try/catch/finally statement for exception handling
 This module implements syntax for try/catch/finally statement with behaviour
 similar to other programming languages (like Java, Python, etc.).
 
-It uses perl ( E<gt>= 5.14 ) experimental parser/lexer API.
+It handles correctly return/wantarray inside try/catch/finally blocks.
+
+It uses perl ( E<gt>= 5.14 ) keyword/parser API.
 
 =head1 SYNTAX
 
@@ -217,22 +219,22 @@ This module is compatible with Exception::Class
         # handle error here
     }
 
-=head2 return from subrutine
+=head2 return from subroutine
 
-This module supports also calling "return" inside try/catch/finally blocks
-to return values from subrutine.
+This module supports calling "return" inside try/catch/finally blocks
+to return values from subroutine.
 
     sub read_config {
         my $file;
         try {
             $fh = IO::File->new(...);
-            return $fh->getline; # it returns value from subrutine "read_config"
+            return $fh->getline; # it returns value from subroutine "read_config"
         }
         catch ($e) {
             # log error
         }
         finally {
-            $fh->close();
+            $fh->close() if $fh;
         }
     }
 
@@ -262,9 +264,9 @@ classes in Perl
 
 =head2 Other similar packages
 
-L<TryCatch> - first class try catch semantics for Perl
+L<TryCatch>
 
-L<Try> - nicer exception handling syntax
+L<Try>
 
 =head1 AUTHOR
 
