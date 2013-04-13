@@ -63,7 +63,7 @@ describe "parser" => sub {
 
             try {
                 warn "AAA";
-                die 123; 
+                die 123;
             }
 
             catch
@@ -76,13 +76,13 @@ describe "parser" => sub {
                 warn "BBB";
             }
 
-            finally 
+            finally
                 {
                     warn "CCC";
                 }
 
-            warn "DDD"; 
-        
+            warn "DDD";
+
         ], qw/ AAA BBB CCC DDD /;
     };
 };

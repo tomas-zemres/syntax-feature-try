@@ -19,13 +19,11 @@ sub uninstall {
 }
 
 # TODO convert "our" to "my" variables
-our $end_of_block;
 our $return_values;
 
 sub _statement {
     my ($try_block, $catch_list, $finally_block) = @_;
 
-    local $end_of_block;
     my $return;
     local $@;
     # TODO deduplicate try/catch/finally blocks code

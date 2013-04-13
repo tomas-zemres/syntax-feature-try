@@ -36,9 +36,9 @@ describe "catch (Mock::Bird ...) {}" => sub {
     };
 
     it "ignores other exceptions classes" => sub {
-        test_catch_bird( bless({}, "Mock::ABC"), 0 ); 
-        test_catch_bird( bless({}, "Mock::Bird::Two"), 0 ); 
-    }; 
+        test_catch_bird( bless({}, "Mock::ABC"), 0 );
+        test_catch_bird( bless({}, "Mock::Bird::Two"), 0 );
+    };
 
     it "skips also any non-object exceptions" => sub {
         test_catch_bird( {}, 0 );

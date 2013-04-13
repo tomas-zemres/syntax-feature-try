@@ -7,23 +7,12 @@
         newASSIGNOP(0, newSVOP(left_sv, 0), OP_SASSIGN, newSVOP(right_sv, 0))
 
 /*
- * append: $Syntax::Feature::Try::end_of_block = 1;
+ * append: END_OF_BLOCK_SV
  */
 static OP* my_build_block_content_op(pTHX_ OP* orig_content_op) {
-    OP* var_end_op;
-
-    var_end_op = newSVREF(
-                    newGVOP(OP_GV, 0,
-                        gv_fetchpvs(VAR_NAME_end_of_block, 0, 0)
-                    )
-                );
-
     return op_append_elem(OP_LINESEQ,
             orig_content_op,
-//            newOP(OP_UNDEF, 0)
-            newASSIGNOP(0, var_end_op, 0,
-                newSVOP(OP_CONST, 0, &PL_sv_yes)
-            )
+            newSVOP(OP_CONST, 0, END_OF_BLOCK_SV)
         );
 }
 

@@ -48,14 +48,10 @@ run_block(SV* coderef, SV* arg1=NULL)
         dSP;
         PERL_CONTEXT *upper_sub_cx;
         I32 gimme, ret_count, i;
-        AV* ret_av;
         SV* ret_av_ref = &PL_sv_undef;
 
         upper_sub_cx = get_sub_context(1);
         gimme = upper_sub_cx ? upper_sub_cx->blk_gimme : 0;
-
-        // undef $end_of_block;
-        sv_setsv(get_sv(VAR_NAME_end_of_block, 0), &PL_sv_undef);
 
         ENTER;
         SAVETMPS;
@@ -71,8 +67,8 @@ run_block(SV* coderef, SV* arg1=NULL)
         SPAGAIN;
         // TODO extract to function
         // if return called inside block:
-        if (!SvTRUE(get_sv(VAR_NAME_end_of_block, 0))) {
-            ret_av = newAV();
+        if (!ret_count || !IS_END_OF_BLOCK(TOPs)) {
+            AV* ret_av = newAV();
             av_extend(ret_av, ret_count-1);
             for (i=ret_count-1; i >= 0; i--) {
                 SV *item = (SV*)POPs;
@@ -87,7 +83,6 @@ run_block(SV* coderef, SV* arg1=NULL)
 
         FREETMPS;
         LEAVE;
-
         RETVAL = ret_av_ref;
     OUTPUT:
         RETVAL

@@ -90,7 +90,7 @@ describe "return" => sub {
                     return mock_return($mode);
                 }
                 finally { }
-                return -5;
+                die "This-is-never-called";
             }
 
             for (@RET_TYPES) {
@@ -138,7 +138,7 @@ describe "return" => sub {
                 catch (Error1 $err) {
                     return mock_return($mode);
                 }
-                return -5;
+                die "This-is-never-called";
             }
 
             for (@RET_TYPES) {
