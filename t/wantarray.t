@@ -159,7 +159,25 @@ describe "wantarray" => sub {
         };
     };
 
-    # TODO later write also tests with "return set_context"
+    it "returns correct context inside function called after return" => sub {
+        sub get_wantarray {
+            return wantarray ? 'array' : 'scalar';
+        }
+
+        sub test_return_wantarray {
+            try {
+                return get_wantarray();
+            }
+            finally { }
+            return 'other';
+        }
+
+        my $scalar = test_return_wantarray();
+        is($scalar, 'scalar', "scalar context ok");
+
+        my @array = test_return_wantarray();
+        is_deeply(\@array, ['array'], "list context ok");
+    };
 };
 
 runtests;
