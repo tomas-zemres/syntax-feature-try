@@ -24,43 +24,35 @@ our $return_values;
 sub _statement {
     my ($try_block, $catch_list, $finally_block) = @_;
 
-    my $return;
+    my $stm_handler = {};
+
     local $@;
-    # TODO deduplicate try/catch/finally blocks code
-    eval {
-        $return = run_block(\&$try_block);
-    };
-    my $exception = $@;
+    my $exception = run_block($stm_handler, $try_block, 1);
     if ($exception and $catch_list) {
-        my $handler = _get_exception_handler($exception, $catch_list);
-        if ($handler) {
-            eval {
-                $return = run_block(\&$handler, $exception);
-            };
-            $exception = $@;
+        my $catch_block = _get_exception_handler($exception, $catch_list);
+        if ($catch_block) {
+            $exception = run_block($stm_handler, $catch_block, 1, $exception);
         }
     }
 
     if ($finally_block) {
-        {
-            $return = run_block(\&$finally_block) || $return;
-        }
+        run_block($stm_handler, $finally_block);
     }
 
     if ($exception) {
         _rethrow($exception);
     }
 
-    $return_values = $return;
-    return $return;
+    $return_values = $stm_handler->{return};
+    return $stm_handler->{return};
 }
 
 sub _get_exception_handler {
     my ($exception, $catch_list) = @_;
 
     foreach my $item (@{ $catch_list }) {
-        my ($handler, @args) = @$item;
-        return $handler if _exception_match_args($exception, @args);
+        my ($block_ref, @args) = @$item;
+        return $block_ref if _exception_match_args($exception, @args);
     }
 }
 

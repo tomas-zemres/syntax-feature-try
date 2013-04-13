@@ -43,12 +43,11 @@ BOOT:
 }
 
 SV*
-run_block(SV* coderef, SV* arg1=NULL)
+run_block(HV* stm_handler, SV* coderef, int in_eval=0, SV* arg1=NULL)
     CODE:
         dSP;
         PERL_CONTEXT *upper_sub_cx;
         I32 gimme, ret_count, i;
-        SV* ret_av_ref = &PL_sv_undef;
 
         upper_sub_cx = get_sub_context(1);
         gimme = upper_sub_cx ? upper_sub_cx->blk_gimme : 0;
@@ -56,18 +55,19 @@ run_block(SV* coderef, SV* arg1=NULL)
         ENTER;
         SAVETMPS;
 
-        // Call arguments: arg1
+        // Call arguments: (optional) arg1
         PUSHMARK(SP);
         if (SvTRUE(arg1)) {
             XPUSHs(arg1);
         }
         PUTBACK;
-        ret_count = call_sv(coderef, gimme);
+        ret_count = call_sv(coderef, gimme | (in_eval ? G_EVAL : 0));
+        RETVAL = newSVsv(ERRSV);
 
         SPAGAIN;
         // TODO extract to function
         // if return called inside block:
-        if (!ret_count || !IS_END_OF_BLOCK(TOPs)) {
+        if (!SvTRUE(ERRSV) && !(ret_count && IS_END_OF_BLOCK(TOPs))) {
             AV* ret_av = newAV();
             av_extend(ret_av, ret_count-1);
             for (i=ret_count-1; i >= 0; i--) {
@@ -77,12 +77,11 @@ run_block(SV* coderef, SV* arg1=NULL)
                     croak(MAIN_PKG " internal error - push return values");
                 }
             }
-            ret_av_ref = newRV_noinc((SV*)ret_av);
+            hv_stores(stm_handler, "return", newRV_noinc((SV*)ret_av));
         }
         PUTBACK;
 
         FREETMPS;
         LEAVE;
-        RETVAL = ret_av_ref;
     OUTPUT:
         RETVAL
