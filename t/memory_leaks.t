@@ -56,8 +56,10 @@ no_leaks_ok {
 } "execution phase does not generates memory-leaks";
 
 sub predefined_func {
+    my $n = shift;
     try {
         my $x = 0;
+        predefined_func($n-1) if $n;
         Mock::AAA->throw;
     }
     catch (Mock::AAA $e) { my $test1 = 44; }
@@ -69,6 +71,10 @@ sub predefined_func {
 no_leaks_ok {
     predefined_func();
 } "execution predefined function does not generates memory-leaks";
+
+no_leaks_ok {
+    predefined_func(3);
+} "execution recursive function does not generates memory-leaks";
 
 no_leaks_ok {
     our $res=0;
