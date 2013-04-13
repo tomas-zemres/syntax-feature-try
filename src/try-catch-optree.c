@@ -26,6 +26,17 @@ static OP* my_build_catch_args_optree(pTHX_ OP* block_op, SV* class_name_sv) {
     return newLISTOP(OP_LIST, 0, (block_op), class_name_op);
 }
 
+#define call_sub_op(name, args_op)  my_call_sub_op(aTHX_ name, args_op)
+static OP* my_call_sub_op(pTHX_ char *name, OP* args_op) {
+    GV *sub_gv = gv_fetchmethod(internal_stash, name);
+
+    return newUNOP(OP_ENTERSUB, OPf_STACKED,
+            op_append_elem(OP_LIST, args_op,
+                newGVOP(OP_GV, 0, sub_gv)
+            )
+        );
+}
+
 /* build optree for:
  *  <MAIN_PKG>::_statement($try_block, [@catch_blocks], $finally_block);
  *  or
@@ -34,7 +45,6 @@ static OP* my_build_catch_args_optree(pTHX_ OP* block_op, SV* class_name_sv) {
 static OP *my_build_statement_optree(pTHX_
             OP *try_block_op, OP* catch_list_op, OP* finally_block_op
 ) {
-    GV *handler_gv, *return_value_gv;
     OP *args_op, *call_op, *return_op;
 
     catch_list_op = catch_list_op ? newANONLIST(catch_list_op)
@@ -43,20 +53,9 @@ static OP *my_build_statement_optree(pTHX_
     args_op = newLISTOP(OP_LIST, 0, try_block_op, catch_list_op);
     args_op = op_append_elem(OP_LIST, args_op, finally_block_op);
 
-    handler_gv = gv_fetchmethod(internal_stash, "_statement");
-    call_op = newUNOP(OP_ENTERSUB, OPf_STACKED,
-            op_append_elem(OP_LIST, args_op,
-                newGVOP(OP_GV, 0, handler_gv)
-            )
-        );
+    call_op = call_sub_op("_statement", args_op);
+    return_op = newUNOP(OP_RETURN, 0, call_sub_op("_get_return_value", NULL));
 
-    // TODO deduplicate with previous call op
-    return_value_gv = gv_fetchmethod(internal_stash, "_get_return_value");
-    return_op = newUNOP(OP_RETURN, 0,
-                    newUNOP(OP_ENTERSUB, OPf_STACKED,
-                        newGVOP(OP_GV, 0, return_value_gv)
-                    )
-                );
     return newCONDOP(0, call_op, return_op, NULL);
 }
 
