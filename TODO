@@ -1,7 +1,7 @@
  - check/fix problems inside try/catch/finally block
     -> loop ops: next,last,redo
 
- - update stacktrace / caller ? 
+ - update stacktrace / caller ?
 
  - test usage in different module that it is used
 
@@ -9,5 +9,5 @@
  - check TODOs in source-code
 
  - set ( %Carp::Internal /  %Carp::CarpInternal ) to skip try/catch blocks
- - check if "die called from DESTROY" called at the end of "try block"
-    does not break try/catch/finally handling
+
+ - fix @_ inside blocks
