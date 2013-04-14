@@ -18,7 +18,7 @@ describe "parser" => sub {
         compile_ok q[
             use syntax 'try';
 
-            try 
+            try
                 {  }
             catch
                 (   My::Test1   $aa     )
@@ -45,6 +45,21 @@ describe "parser" => sub {
             finally     # comment 111
                 {       # 222
                 }       # 333
+        ];
+    };
+
+    it "can be parsed also without optional args" => sub {
+        compile_ok q[
+            use syntax 'try';
+
+            try {
+            }
+            catch ( My::Test1 ) {
+            }
+            catch {
+            }
+            finally {
+            }
         ];
     };
 };

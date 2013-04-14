@@ -1,5 +1,9 @@
 Revision history for perl module Syntax::Feature::Try
 
+0.005   ???
+
+    - Exception variable in catch block is not mandatory
+
 0.004   2013-04-12
 
     - Add support for using "return" inside try/catch/finally

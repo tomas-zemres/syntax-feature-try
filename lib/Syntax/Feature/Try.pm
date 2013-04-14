@@ -152,6 +152,20 @@ To catch all errors use syntax:
 Caught error is accessible inside I<catch block>
 via declared local variable C<$e>.
 
+=head2 catch without variable
+
+Variable name in catch block is not mandatory:
+
+    try {
+        ...
+    }
+    catch (MyError::FileNotFound) {
+        print "file not found";
+    }
+    catch {
+        print "operation failed";
+    }
+
 =head2 rethrow error
 
 To rethrow caught error call "die $err".

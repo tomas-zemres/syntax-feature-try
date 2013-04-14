@@ -1,5 +1,6 @@
  - check/fix problems inside try/catch/finally block
-    -> loop ops: next,last,redo
+    - loop ops: next,last,redo
+    - fix @_ inside blocks
 
  - update stacktrace / caller ?
 
@@ -10,4 +11,3 @@
 
  - set ( %Carp::Internal /  %Carp::CarpInternal ) to skip try/catch blocks
 
- - fix @_ inside blocks

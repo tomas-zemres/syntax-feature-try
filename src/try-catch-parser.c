@@ -131,37 +131,37 @@ static void my_warn_on_unusual_class_name(pTHX_ char *name) {
 static OP *my_parse_catch_args(pTHX) {
     SV *class_name_sv, *var_name_sv;
     OP *block_op;
+    char *prepend_code = NULL;
 
     lex_read_space(0);
-    if (!parse_char('(')) {
-        syntax_error("expected '(' after catch");
+    if (parse_char('(')) {
+
+        // exception class-name
+        lex_read_space(0);
+        class_name_sv = parse_identifier(1);
+        if (class_name_sv) {
+            DEBUG_MSG("class-name: %s\n", SvPVbyte_nolen(class_name_sv));
+            warn_on_unusual_class_name(SvPVbyte_nolen(class_name_sv));
+        }
+
+        // exception variable-name
+        lex_read_space(0);
+        if (parse_char('$')) {
+            var_name_sv = sv_2mortal(parse_identifier(0));
+            if (!var_name_sv) {
+                syntax_error("invalid catch syntax");
+            }
+            DEBUG_MSG("varname: %s\n", SvPVbyte_nolen(var_name_sv));
+            prepend_code = form("my $%s=shift;", SvPVbyte_nolen(var_name_sv));
+        }
+
+        lex_read_space(0);
+        if (!parse_char(')')) {
+            syntax_error("invalid catch syntax");
+        }
     }
 
-    // exception class-name
-    lex_read_space(0);
-    class_name_sv = parse_identifier(1);
-    if (class_name_sv) {
-        DEBUG_MSG("class-name: %s\n", SvPVbyte_nolen(class_name_sv));
-        warn_on_unusual_class_name(SvPVbyte_nolen(class_name_sv));
-    }
-
-    // exception variable-name
-    lex_read_space(0);
-    if (!parse_char('$')) {
-        syntax_error("invalid catch syntax");
-    }
-    var_name_sv = sv_2mortal(parse_identifier(0));
-    if (!var_name_sv) {
-        syntax_error("invalid catch syntax");
-    }
-    DEBUG_MSG("varname: %s\n", SvPVbyte_nolen(var_name_sv));
-
-    lex_read_space(0);
-    if (!parse_char(')')) {
-        syntax_error("invalid catch syntax");
-    }
-
-    block_op = parse_code_block(form("my $%s=shift;", SvPVbyte_nolen(var_name_sv)));
+    block_op = parse_code_block(prepend_code);
     if (!block_op) {
         syntax_error("expected block after 'catch()'");
     }

@@ -58,34 +58,12 @@ describe "parser" => sub {
                 ], qr/^syntax error: try\/catch\/finally sequence at \(eval \d+\) line 5[.]?$/;
         };
 
-        it "throws error if it is not followed by '('" => sub {
-            test_syntax_error q[
-                    use syntax 'try';
-
-                    try { }
-                    catch (My::Test1 $e) {
-                        my $i = 7;
-                    }
-                    catch {
-                    }
-                ], qr/^syntax error: expected '\(' after catch at \(eval \d+\) line 8[.]?$/;
-        };
-
         it "throws error if class-name has invalid syntax" => sub {
             test_syntax_error q[
                     use syntax 'try';
 
                     try { }
                     catch (Test::Foo:x $abc) { }
-                ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
-        };
-
-        it "throws error if variable is missing" => sub {
-            test_syntax_error q[
-                    use syntax 'try';
-
-                    try { }
-                    catch () { }
                 ], qr/^syntax error: invalid catch syntax at \(eval \d+\) line 5[.]?$/;
         };
 
