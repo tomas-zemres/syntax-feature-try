@@ -24,7 +24,7 @@ our $return_values;
 sub _statement {
     my ($try_block, $catch_list, $finally_block) = @_;
 
-    my $stm_handler = {};
+    my $stm_handler = bless {finally => $finally_block}, __PACKAGE__;
 
     local $@;
     my $exception = run_block($stm_handler, $try_block, 1);
@@ -36,6 +36,7 @@ sub _statement {
     }
 
     if ($finally_block) {
+        delete $stm_handler->{finally};
         run_block($stm_handler, $finally_block);
     }
 
@@ -45,6 +46,11 @@ sub _statement {
 
     $return_values = $stm_handler->{return};
     return $stm_handler->{return};
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    run_block($self, $self->{finally}) if $self->{finally};
 }
 
 sub _get_exception_handler {
