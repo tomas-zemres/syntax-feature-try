@@ -1,8 +1,10 @@
 Revision history for perl module Syntax::Feature::Try
 
-0.005   ???
+0.005   2013-04-19
 
     - Exception variable in catch block is not mandatory
+    - Fix: always call finally block (even if exit() is called)
+    - Fix mistypes in documentation
 
 0.004   2013-04-12
 
