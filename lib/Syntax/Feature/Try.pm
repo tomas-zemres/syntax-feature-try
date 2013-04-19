@@ -272,6 +272,10 @@ L<TryCatch>
 
 L<Try>
 
+=head1 GIT REPOSITORY
+
+L<http://github.com/tomas-zemres/syntax-feature-try>
+
 =head1 AUTHOR
 
 Tomas Pokorny <tnt at cpan dot org>
