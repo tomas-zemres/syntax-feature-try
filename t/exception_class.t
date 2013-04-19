@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Test::Exception;
 use Exception::Class (
     'Error::Mock::AAA',
@@ -23,6 +24,10 @@ describe "Exception::Class errors" => sub {
 
         is_deeply(\@log, ['mock-error-msg']);
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

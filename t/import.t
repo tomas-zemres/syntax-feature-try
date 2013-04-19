@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 
 use FindBin qw/ $Bin /;
 use lib "$Bin/lib";
@@ -47,6 +48,10 @@ describe "import syntax" => sub {
             }
         ], qr/^syntax error .*at \(eval \d+\) line 15/;
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

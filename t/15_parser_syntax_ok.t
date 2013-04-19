@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 
 use FindBin qw/ $Bin /;
 use lib "$Bin/lib";
@@ -62,6 +63,10 @@ describe "parser" => sub {
             }
         ];
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

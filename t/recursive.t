@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Exception::Class 'TestError';
 
 use syntax 'try';
@@ -68,6 +69,10 @@ describe "recursive calling catch block" => sub {
             catch-2-after=e2
         /]);
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Test::Exception;
 
 use syntax 'try';
@@ -23,6 +24,10 @@ describe 'catch ($e)' => sub {
         test_catch_others( 'my-err' );
         test_catch_others( 123 );
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

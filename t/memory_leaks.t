@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+require Test::NoWarnings;
 use Test::LeakTrace;
 use Exception::Class qw/ Mock::AAA  Mock::BBB  Mock::CCC /;
 
@@ -129,5 +130,7 @@ no_leaks_ok {
     # array context
     my @return = test_override_return();
 } "return inside blocks does not generates memory-leaks";
+
+Test::NoWarnings::had_no_warnings();
 
 done_testing;

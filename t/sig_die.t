@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Exception::Class qw/
     Err::AAA
     Err::BBB
@@ -37,6 +38,10 @@ describe '$SIG{__DIE__}' => sub {
             'error modified exactly 3-times');
         ok($finally_called);
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

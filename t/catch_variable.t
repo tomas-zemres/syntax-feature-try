@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 
 use syntax 'try';
 
@@ -67,6 +68,10 @@ describe "exception variable" => sub {
         is($e, 'orig-value');
         is_deeply(\@done, [mock_err('AAA'), mock_err('BBB')]);
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

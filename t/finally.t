@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Test::Exception;
 use Exception::Class qw/
     MyTestErr
@@ -118,6 +119,10 @@ describe "finally" => sub {
             after
         /]);
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

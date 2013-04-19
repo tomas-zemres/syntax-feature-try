@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Test::Warn;
 
 use FindBin qw/ $Bin /;
@@ -49,6 +50,10 @@ describe "catch block" => sub {
             ];
         } "";
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

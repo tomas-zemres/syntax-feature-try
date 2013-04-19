@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Test::Exception;
 
 use syntax 'try';
@@ -53,6 +54,10 @@ describe "statement" => sub {
             catch ($other) { fail("others block is never executed") }
         } 'Mock::NewErr';
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

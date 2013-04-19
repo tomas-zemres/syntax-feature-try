@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Exception::Class 'TestErr';
 
 our @done;
@@ -67,6 +68,10 @@ describe "try/catch/finally handling" => sub {
             /]);
         }
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

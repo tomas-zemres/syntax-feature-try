@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 
 use 5.010;
 use FindBin qw/ $Bin /;
@@ -290,6 +291,10 @@ describe "return" => sub {
             }
         ];
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

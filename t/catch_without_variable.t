@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Exception::Class qw/ MockErr::AAA  MockErr::BBB /;
 
 use syntax 'try';
@@ -27,6 +28,10 @@ describe "catch without variable" => sub {
         is(test_catch("abc"), 'other');
         is(test_catch(undef), 'err');
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

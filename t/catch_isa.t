@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use MooseX::Declare;
 
 use syntax 'try';
@@ -45,6 +46,10 @@ describe "catch (Mock::Bird ...) {}" => sub {
         test_catch_bird( "mock-error", 0 );
         test_catch_bird( "Mock::Bird", 0 );
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

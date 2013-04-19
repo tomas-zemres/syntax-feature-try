@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Syntax::Feature::Try;
 
 use FindBin qw/ $Bin /;
@@ -113,6 +114,10 @@ describe "code try/catch/finally" => sub {
             is( scalar @{ $parsed[1] }, 1 );
         };
     };
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;

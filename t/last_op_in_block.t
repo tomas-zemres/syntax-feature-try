@@ -1,4 +1,5 @@
 use Test::Spec;
+require Test::NoWarnings;
 use Exception::Class qw/ MockErr /;
 
 use FindBin qw/ $Bin /;
@@ -60,6 +61,10 @@ describe "last op" => sub {
         };
     };
 
+};
+
+it "has no warnings" => sub {
+    Test::NoWarnings::had_no_warnings();
 };
 
 runtests;
