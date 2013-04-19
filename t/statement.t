@@ -54,6 +54,38 @@ describe "statement" => sub {
             catch ($other) { fail("others block is never executed") }
         } 'Mock::NewErr';
     };
+
+    it "can use upper local variables" => sub {
+
+        lives_ok {
+            my @out;
+            my $a = 11;
+            my $b = 22;
+            try {
+                push @out, "try-$a";
+                try {
+                    push @out, "try-$b";
+                    die bless {}, "Mock::Err";
+                }
+                catch (Mock::Err $e) {
+                    push @out, "catch-$b";
+                }
+            }
+            finally {
+                push @out, "finally-$a";
+            }
+
+            is_deeply(
+                \@out,
+                [qw/
+                    try-11
+                    try-22
+                    catch-22
+                    finally-11
+                /]
+            );
+        };
+    };
 };
 
 it "has no warnings" => sub {
