@@ -85,10 +85,11 @@ static SV *my_parse_identifier(pTHX_ int allow_namespace) {
     return ident;
 }
 
-#define parse_code_block(inj_code)  my_parse_code_block(aTHX_ inj_code)
-static OP *my_parse_code_block(pTHX_ char *inject_code) {
+#define parse_code_block(err_var_name)  my_parse_code_block(aTHX_ err_var_name)
+static OP *my_parse_code_block(pTHX_ SV *err_var_name_sv) {
     I32 floor;
     OP *content_op, *ret_op;
+    char *inject_code;
 
     lex_read_space(0);
     if (lex_next_char != '{') {
@@ -96,7 +97,8 @@ static OP *my_parse_code_block(pTHX_ char *inject_code) {
     }
 
     // TODO better might be inject OPcode tree - instead of source-code
-    if (inject_code) {
+    if (err_var_name_sv) {
+        inject_code = form("my $%s=shift;", SvPVbyte_nolen(err_var_name_sv));
         DEBUG_MSG("Inject into block: %s\n", inject_code);
         lex_read_to(lex_buf_ptr+1);
         lex_stuff_pvn(inject_code, strlen(inject_code), 0);
@@ -131,7 +133,6 @@ static void my_warn_on_unusual_class_name(pTHX_ char *name) {
 static OP *my_parse_catch_args(pTHX) {
     SV *class_name_sv, *var_name_sv;
     OP *block_op;
-    char *prepend_code = NULL;
 
     lex_read_space(0);
     if (parse_char('(')) {
@@ -152,7 +153,6 @@ static OP *my_parse_catch_args(pTHX) {
                 syntax_error("invalid catch syntax");
             }
             DEBUG_MSG("varname: %s\n", SvPVbyte_nolen(var_name_sv));
-            prepend_code = form("my $%s=shift;", SvPVbyte_nolen(var_name_sv));
         }
 
         lex_read_space(0);
@@ -161,7 +161,7 @@ static OP *my_parse_catch_args(pTHX) {
         }
     }
 
-    block_op = parse_code_block(prepend_code);
+    block_op = parse_code_block(var_name_sv);
     if (!block_op) {
         syntax_error("expected block after 'catch()'");
     }
