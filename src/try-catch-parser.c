@@ -134,6 +134,8 @@ static OP *my_parse_catch_args(pTHX) {
     SV *class_name_sv, *var_name_sv;
     OP *block_op;
 
+    var_name_sv = NULL;
+
     lex_read_space(0);
     if (parse_char('(')) {
 
