@@ -1,5 +1,10 @@
 Revision history for perl module Syntax::Feature::Try
 
+0.006   2013-04-22
+
+    - Fix error: catch block without error varible is not working
+        on some systems
+
 0.005   2013-04-19
 
     - Exception variable in catch block is not mandatory
