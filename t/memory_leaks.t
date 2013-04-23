@@ -28,6 +28,10 @@ no_leaks_ok {
             }
             catch (Mock::BBB $b) {
             }
+            catch (Mock::AAA) {
+            }
+            catch {
+            }
             finally {
                 my $a = 7;
             }
@@ -56,14 +60,35 @@ no_leaks_ok {
     die "Invalid response: $res" if $res != 7102;
 } "execution phase does not generates memory-leaks";
 
+no_leaks_ok {
+    my $res=0;
+    try {
+        try { Mock::BBB->throw }
+        catch (Mock::AAA) { $res=1 }
+        catch (Mock::BBB) { $res=2 }
+        catch { $res=4 }
+        finally { $res += 100 }
+    }
+    catch (Mock::DDD) {
+        my $e = 'blax';
+    }
+    finally {
+        $res += 7000;
+    }
+
+    die "Invalid response: $res" if $res != 7102;
+} "catch without var-name does not generates memory-leaks";
+
 sub predefined_func {
-    my $n = shift;
+    my $n = shift || 0;
     try {
         my $x = 0;
         predefined_func($n-1) if $n;
-        Mock::AAA->throw;
+        Mock::AAA->throw if $n > 1;
+        Mock::BBB->throw;
     }
     catch (Mock::AAA $e) { my $test1 = 44; }
+    catch (Mock::BBB) { my $test2 = 55; }
     finally {
         my $y = 40;
     }
