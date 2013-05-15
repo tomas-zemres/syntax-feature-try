@@ -1,14 +1,22 @@
 use Test::Spec;
 require Test::NoWarnings;
-use MooseX::Declare;
 
 use syntax 'try';
 
 # mock classes inheritance for tests
-class Mock::Animal                          { }
-class Mock::Bird    extends Mock::Animal    { }
-class Mock::Raptor  extends Mock::Bird      { }
-class Mock::Eagle   extends Mock::Raptor    { }
+package Mock::Animal;
+sub new { bless {}, shift };
+
+package Mock::Bird;
+use base 'Mock::Animal';
+
+package Mock::Raptor;
+use base 'Mock::Bird';
+
+package Mock::Eagle;
+use base 'Mock::Raptor';
+
+package main;
 
 sub test_catch_bird {
     my ($err, $expected_result) = @_;
