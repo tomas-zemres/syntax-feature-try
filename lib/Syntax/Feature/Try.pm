@@ -278,6 +278,8 @@ L<TryCatch>
 
 L<Try>
 
+L<Try::Tiny>
+
 =head1 GIT REPOSITORY
 
 L<http://github.com/tomas-zemres/syntax-feature-try>
