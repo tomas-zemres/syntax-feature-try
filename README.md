@@ -13,3 +13,9 @@ for help: dzil -h
 dzil clean
 dzil build
 dzil test
+
+Debugging environment variables
+-------------------------------
+TRY_PARSER_DEBUG
+TRY_PARSER_DUMP
+

@@ -133,7 +133,7 @@ static OP *my_parse_catch_args(pTHX) {
     OP *block_op;
     char *prepend_code = NULL;
 
-    var_name_sv = NULL;
+    class_name_sv = var_name_sv = NULL;
 
     lex_read_space(0);
     if (parse_char('(')) {
