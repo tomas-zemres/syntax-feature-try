@@ -1,5 +1,9 @@
 Revision history for perl module Syntax::Feature::Try
 
+0.009   2013-09-06
+
+    - Fix wrongly detected prerequisities for tests
+
 0.008   2013-08-30
 
     - Fix missing initialization of class_name_sv=NULL
