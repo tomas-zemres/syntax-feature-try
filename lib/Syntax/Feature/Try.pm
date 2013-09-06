@@ -120,7 +120,7 @@ similar to other programming languages (like Java, Python, etc.).
 
 It handles correctly return/wantarray inside try/catch/finally blocks.
 
-It uses perl ( E<gt>= 5.14 ) keyword/parser API.
+It uses perl keyword/parser API. So it requires B<perl E<gt>= 5.14>.
 
 =head1 SYNTAX
 
@@ -277,9 +277,49 @@ classes in Perl
 
 L<TryCatch>
 
+=over
+
+=item *
+
+It reports wrong line numbers from warn/die calls inside try/catch blocks.
+
+=item *
+
+It does not support "finally" block.
+
+=item *
+
+It works on perl E<lt> 5.14
+
+=back
+
 L<Try>
 
+=over
+
+=item *
+
+It does not support catching errors by their ISA (i.e. it has only one catch block that takes all errors and you must write additinal if/else code to rethrow other exceptions).
+
+=back
+
 L<Try::Tiny>
+
+=over
+
+=item *
+
+It does not support catching errors by their ISA (i.e. it has only one catch block that takes all errors and you must write additinal if/else code to rethrow other exceptions).
+
+=item *
+
+It generates expression (instead of statement), i.e. it requires semicolon after last block. Missing semicolon before or after try/catch expression may be hard to debug (it is not always reported as syntax error).
+
+=item *
+
+It works on perl E<lt> 5.14 (It is written in pure perl).
+
+=back
 
 =head1 GIT REPOSITORY
 

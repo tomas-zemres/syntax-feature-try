@@ -3,6 +3,8 @@ syntax-feature-try
 
 Perl module Syntax::Feature::Try
 
+try/catch/finally statement for exception handling
+
 Build notes
 -----------
 
