@@ -1,5 +1,6 @@
 package Syntax::Feature::Try;
 
+use 5.014;
 use strict;
 use warnings;
 use XSLoader;

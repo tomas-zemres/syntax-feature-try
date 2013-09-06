@@ -1,7 +1,7 @@
+use 5.014;
 use Test::Spec;
 require Test::NoWarnings;
 
-use 5.010;
 use FindBin qw/ $Bin /;
 use lib "$Bin/lib";
 use test_tools qw/ test_syntax_error compile_ok /;

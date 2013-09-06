@@ -1,4 +1,4 @@
-use v5.10.1;
+use 5.014;
 use Test::Spec;
 use Exception::Class qw/
     Err::AAA

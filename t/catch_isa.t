@@ -4,55 +4,55 @@ require Test::NoWarnings;
 use syntax 'try';
 
 # mock classes inheritance for tests
-package Mock::Animal;
-sub new { bless {}, shift };
+{
+    package MyMock::Animal;
+    sub new { bless {}, shift };
 
-package Mock::Bird;
-use base 'Mock::Animal';
+    package MyMock::Bird;
+    use base 'MyMock::Animal';
 
-package Mock::Raptor;
-use base 'Mock::Bird';
+    package MyMock::Raptor;
+    use base 'MyMock::Bird';
 
-package Mock::Eagle;
-use base 'Mock::Raptor';
-
-package main;
+    package MyMock::Eagle;
+    use base 'MyMock::Raptor';
+}
 
 sub test_catch_bird {
     my ($err, $expected_result) = @_;
 
     my $result;
     try { die $err }
-    catch (Mock::Bird $e) { $result=1 }
+    catch (MyMock::Bird $e) { $result=1 }
     catch ($others) { $result=0 }
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     is($result, $expected_result);
 }
 
-describe "catch (Mock::Bird ...) {}" => sub {
+describe "catch (MyMock::Bird ...) {}" => sub {
     it "handles exception of given class" => sub {
-        test_catch_bird( Mock::Bird->new(), 1 );
+        test_catch_bird( MyMock::Bird->new(), 1 );
     };
 
     it "handles also exceptions based on given class" => sub {
-        test_catch_bird( Mock::Raptor->new(), 1 );
-        test_catch_bird( Mock::Eagle->new(), 1 );
+        test_catch_bird( MyMock::Raptor->new(), 1 );
+        test_catch_bird( MyMock::Eagle->new(), 1 );
     };
 
     it "ignores it's super-class(es)" => sub {
-        test_catch_bird( Mock::Animal->new(), 0 );
+        test_catch_bird( MyMock::Animal->new(), 0 );
     };
 
     it "ignores other exceptions classes" => sub {
-        test_catch_bird( bless({}, "Mock::ABC"), 0 );
-        test_catch_bird( bless({}, "Mock::Bird::Two"), 0 );
+        test_catch_bird( bless({}, "MyMock::ABC"), 0 );
+        test_catch_bird( bless({}, "MyMock::Bird::Two"), 0 );
     };
 
     it "skips also any non-object exceptions" => sub {
         test_catch_bird( {}, 0 );
         test_catch_bird( "mock-error", 0 );
-        test_catch_bird( "Mock::Bird", 0 );
+        test_catch_bird( "MyMock::Bird", 0 );
     };
 };
 
