@@ -66,11 +66,14 @@ sub _get_exception_handler {
 sub _exception_match_args {
     my ($exception, $className) = @_;
 
-    if (defined $className) {
-        return 0 if not blessed($exception);
-        return 0 if not $exception->isa($className);
+    return 1 if not defined $className; # without args catch all exceptions
+
+    if (Moose::Util::TypeConstraints->can('find_type_constraint')) {
+        my $type = Moose::Util::TypeConstraints::find_type_constraint($className);
+        return $type->check($exception) if $type;
     }
-    return 1;   # without args catch all exceptions
+
+    return blessed($exception) && $exception->isa($className);
 }
 
 sub _rethrow {
@@ -213,7 +216,9 @@ You can convert errors inside finally block to warnings:
         catch ($e) { warn $e }
     }
 
-=head1 Exception::Class
+=head1 Supported features
+
+=head2 Exception::Class
 
 This module is compatible with Exception::Class
 
@@ -228,6 +233,24 @@ This module is compatible with Exception::Class
     }
     catch (My::Test::Error $err) {
         # handle error here
+    }
+
+=head2 Moose::Util::TypeConstraints
+
+This module is able to handle subtypes defined using
+L<Moose::Util::TypeConstraints> (but it does not require to be this package
+installed if you don't use this feature).
+
+    use Moose::Util::TypeConstraints;
+
+    class_type 'Error' => { class => 'My::Error' };
+    subtype 'BillingError', as 'Error', where { $_->category eq 'billing' };
+
+    try {
+        ...
+    }
+    catch (BillingError $err) {
+        # handle subtype BillingError
     }
 
 =head2 return from subroutine
@@ -272,6 +295,8 @@ L<syntax> - Active syntax extensions
 
 L<Exception::Class> - A module that allows you to declare real exception
 classes in Perl
+
+L<Moose::Util::TypeConstraints>
 
 =head2 Other similar packages
 
