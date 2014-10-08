@@ -7,7 +7,7 @@ use XSLoader;
 use Scalar::Util qw/ blessed /;
 
 BEGIN {
-    our $VERSION = '0.009';
+    our $VERSION = '1.000';
     XSLoader::load();
 }
 

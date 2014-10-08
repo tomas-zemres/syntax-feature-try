@@ -1,5 +1,10 @@
 Revision history for perl module Syntax::Feature::Try
 
+1.000   2014-10-08
+
+    - Add support for subtypes from Moose::Util::TypeConstraints
+    - (fix warnings in unit tests)
+
 0.009   2013-09-06
 
     - Fix wrongly detected prerequisities for tests
