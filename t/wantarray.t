@@ -102,10 +102,8 @@ describe "wantarray" => sub {
                 mock_code;
                 for (my $i=0; $i<5; $i++) {
                     if ($i == 3) {
-                        given ($i) {
-                            when (/\d/) {
-                                $wantarray = wantarray;
-                            }
+                        if ($i =~ /\d/) {
+                            $wantarray = wantarray;
                         }
                     }
                 }

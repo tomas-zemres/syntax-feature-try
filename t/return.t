@@ -14,24 +14,20 @@ my @RET_TYPES = qw/ array list scalar undef none /;
 
 sub mock_return {
     my $mode = shift;
-    given ($mode) {
-        when ('array') {
-            my @a = qw/ aa bb cc dd /;
-            return @a;
-        }
-        when ('list') {
-            return (444,666,777);
-        }
-        when ('scalar') {
-            return 53.3;
-        }
-        when ('undef') {
-            return undef;
-        }
-        default {
-            return;
-        }
+    if ($mode eq 'array') {
+        my @a = qw/ aa bb cc dd /;
+        return @a;
     }
+    elsif ($mode eq 'list') {
+        return (444,666,777);
+    }
+    elsif ($mode eq 'scalar') {
+        return 53.3;
+    }
+    elsif ($mode eq 'undef') {
+        return undef;
+    }
+    return;
 }
 
 describe "return" => sub {
