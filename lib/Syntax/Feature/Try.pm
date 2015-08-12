@@ -3,6 +3,7 @@ package Syntax::Feature::Try;
 use 5.014;
 use strict;
 use warnings;
+use Carp;
 use XSLoader;
 use Scalar::Util qw/ blessed /;
 
@@ -11,6 +12,8 @@ BEGIN {
     XSLoader::load();
 }
 
+my @custom_exception_matchers;
+
 sub install {
     $^H{+HINTKEY_ENABLED} = 1;
 }
@@ -18,6 +21,21 @@ sub install {
 sub uninstall {
     $^H{+HINTKEY_ENABLED} = 0;
 }
+
+sub register_exception_matcher {
+    my ($code_ref) = @_;
+
+    if (ref($code_ref) ne 'CODE') {
+        croak "Invalid parameter: expected CODE reference.";
+    }
+
+    if (not grep { $_ == $code_ref } @custom_exception_matchers) {
+        push @custom_exception_matchers, $code_ref;
+    }
+}
+
+# only for tests:
+sub _custom_exception_matchers { @custom_exception_matchers }
 
 # TODO convert "our" to "my" variables
 our $return_values;
@@ -67,6 +85,11 @@ sub _exception_match_args {
     my ($exception, $className) = @_;
 
     return 1 if not defined $className; # without args catch all exceptions
+
+    foreach my $matcher (@custom_exception_matchers) {
+        my $result = $matcher->($exception, $className);
+        return $result if defined $result;
+    }
 
     if (Moose::Util::TypeConstraints->can('find_type_constraint')) {
         my $type = Moose::Util::TypeConstraints::find_type_constraint($className);
@@ -272,6 +295,43 @@ to return values from subroutine.
         }
     }
 
+=head2 using custom exception class matcher
+
+There is possible register own subroutine (custom exception matcher)
+for extending internal className-matcher logic.
+
+For example:
+
+    use syntax 'try';
+
+    sub is_expected_ref {
+        my ($exception, $className) = @_;
+        my ($expected_ref) = $className =~ /^is_ref::(.+)/;
+
+        # use default logic if $className is not begning with 'is_ref::'
+        return if not $expected_ref;
+
+        return ( ref($exception) eq $expected_ref ? 1 : 0 );
+    }
+
+    Syntax::Feature::Try::register_exception_matcher(\&is_expected_ref);
+
+    ...
+
+    try { ... }
+    catch (is_ref::CODE) {
+        # there is handled any exception that is CODE-reference,
+        # because custom exception matcher returns 1 in this case
+    }
+
+Exception matcher subroutine has two arguments:
+first ($exception) is tested exception,
+second ($className) is className expected in "catch block".
+It should return undef if given $className cannon be handled by exception matcher
+(in this case next registered matchers or default matcher is executed)
+otherwise return 1 or 0 as result of your own match $exception to $className.
+
+Note that multiple custom matchers may be registered.
 
 =head1 CAVEATS
 
