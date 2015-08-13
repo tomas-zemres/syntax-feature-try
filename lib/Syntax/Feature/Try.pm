@@ -8,7 +8,7 @@ use XSLoader;
 use Scalar::Util qw/ blessed /;
 
 BEGIN {
-    our $VERSION = '1.000';
+    our $VERSION = '1.001';
     XSLoader::load();
 }
 
@@ -420,5 +420,7 @@ Copyright 2013 - Tomas Pokorny.
 
 This program is free software;
 you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=for Pod::Coverage HINTKEY_ENABLED install uninstall run_block register_exception_matcher
 
 =cut
