@@ -6,13 +6,22 @@ use syntax 'try';
 sub test_catch_variable {
     my ($err, $expected_result) = @_;
 
-    my $result;
+    my ($custom_variable, $eval_error);
     try { die $err }
-    catch (MyTestErr $obj) { $result = $obj }
-    catch ($others) { $result = "others: $others" }
+    catch (MyTestErr $obj) {
+        $custom_variable = $obj;
+        $eval_error = $@;
+    }
+    catch ($others) {
+        $custom_variable = "others: $others";
+        $eval_error = "others: $@";
+    }
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    is($result, $expected_result);
+    is($custom_variable, $expected_result,
+        'exception is saved into custom variable');
+    is($eval_error, $expected_result,
+        'exception is saved into $@');
 }
 
 sub mock_err {

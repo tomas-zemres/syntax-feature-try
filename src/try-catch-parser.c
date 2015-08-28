@@ -131,7 +131,7 @@ static void my_warn_on_unusual_class_name(pTHX_ char *name) {
 static OP *my_parse_catch_args(pTHX) {
     SV *class_name_sv, *var_name_sv;
     OP *block_op;
-    char *prepend_code = NULL;
+    char *prepend_code = "local $@ = shift;";
 
     class_name_sv = var_name_sv = NULL;
 
@@ -154,7 +154,7 @@ static OP *my_parse_catch_args(pTHX) {
                 syntax_error("invalid catch syntax");
             }
             DEBUG_MSG("varname: %s\n", SvPVbyte_nolen(var_name_sv));
-            prepend_code = form("my $%s=shift;", SvPVbyte_nolen(var_name_sv));
+            prepend_code = form("local $@ = my $%s=shift;", SvPVbyte_nolen(var_name_sv));
         }
 
         lex_read_space(0);

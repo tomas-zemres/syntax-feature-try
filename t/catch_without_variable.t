@@ -12,12 +12,15 @@ describe "catch without variable" => sub {
                 die $err if $err;
             }
             catch (MockErr::AAA) {
+                isa_ok($@, 'MockErr::AAA', 'exception is available in $@');
                 return "A";
             }
             catch (MockErr::BBB) {
+                isa_ok($@, 'MockErr::BBB', 'exception is available in $@');
                 return "B";
             }
             catch {
+                like($@, qr/$err/, 'exception is available in $@');
                 return "other";
             }
             return "err";
