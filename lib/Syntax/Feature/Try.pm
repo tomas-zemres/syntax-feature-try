@@ -100,9 +100,7 @@ sub _exception_match_args {
 }
 
 sub _rethrow {
-    my ($exception) = @_;
-    local $SIG{__DIE__} = undef;
-    die $exception;
+    die (@_);
 }
 
 sub _get_return_value {
