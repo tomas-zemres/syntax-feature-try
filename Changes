@@ -1,5 +1,10 @@
 Revision history for perl module Syntax::Feature::Try
 
+1.003   2015-12-04
+
+   - Fix issue with CGI::Carp: https://rt.cpan.org/Ticket/Display.html?id=104404
+        i.e. removed internal: local $SIG{__DIE__} = undef;
+
 1.002   2015-08-28
 
     - Set $@ inside "catch block" for better compatibility with Throwable (Moose)
