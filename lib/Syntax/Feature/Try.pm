@@ -343,6 +343,10 @@ because these blocks are internally called in different context.
 C<next>, C<last> and C<redo> is not working inside try/catch/finally blocks,
 because these blocks are internally called in different context.
 
+=head2 goto
+
+C<goto> can't be used to get out of a try, catch or finally block.
+
 =head1 BUGS
 
 None bugs known.
