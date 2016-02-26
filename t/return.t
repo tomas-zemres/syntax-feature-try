@@ -10,7 +10,7 @@ use Exception::Class 'Error1';
 use syntax 'try';
 
 
-my @RET_TYPES = qw/ array list scalar undef none /;
+my @RET_TYPES = qw/ array list scalar undef wantarray none /;
 
 sub mock_return {
     my $mode = shift;
@@ -26,6 +26,9 @@ sub mock_return {
     }
     elsif ($mode eq 'undef') {
         return undef;
+    }
+    elsif ($mode eq 'wantarray') {
+        return wantarray ? 'want-array' : 'want-scalar';
     }
     return;
 }
