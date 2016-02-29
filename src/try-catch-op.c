@@ -54,7 +54,8 @@ static OP *my_build_statement_optree(pTHX_
     args_op = op_append_elem(OP_LIST, args_op, finally_block_op);
 
     call_op = call_sub_op("_statement", args_op);
-    return_op = newUNOP(OP_RETURN, 0, call_sub_op("_get_return_value", NULL));
+    return_op = op_convert_list(OP_RETURN, 0,
+                    call_sub_op("_get_return_value", NULL));
 
     return newCONDOP(0, call_op, return_op, NULL);
 }
