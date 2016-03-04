@@ -10,26 +10,16 @@ use Exception::Class 'Error1';
 use syntax 'try';
 
 
-my @RET_TYPES = qw/ array list scalar undef wantarray none /;
+my @RET_TYPES = qw/ array list empty_list scalar undef wantarray none /;
 
 sub mock_return {
     my $mode = shift;
-    if ($mode eq 'array') {
-        my @a = qw/ aa bb cc dd /;
-        return @a;
-    }
-    elsif ($mode eq 'list') {
-        return (444,666,777);
-    }
-    elsif ($mode eq 'scalar') {
-        return 53.3;
-    }
-    elsif ($mode eq 'undef') {
-        return undef;
-    }
-    elsif ($mode eq 'wantarray') {
-        return wantarray ? 'want-array' : 'want-scalar';
-    }
+    if ($mode eq 'array')       { my @a = qw/ aa bb cc dd /; return @a; }
+    if ($mode eq 'list')        { return (444,666,777); }
+    if ($mode eq 'empty_list')  { return (); }
+    if ($mode eq 'scalar')      { return 53.3; }
+    if ($mode eq 'undef')       { return undef; }
+    if ($mode eq 'wantarray') {  return wantarray ? 'want-array' : 'want-scalar'; }
     return;
 }
 
@@ -43,11 +33,17 @@ describe "return" => sub {
             is_deeply([ mock_return('list') ], [qw/ 444 666 777 /]);
             is_deeply(scalar(mock_return('list')), 777);
 
+            is_deeply([ mock_return('empty_list') ], []);
+            is_deeply(scalar(mock_return('empty_list')), undef);
+
             is_deeply([ mock_return('scalar') ], [53.3]);
             is_deeply(scalar mock_return('scalar'), 53.3);
 
             is_deeply([ mock_return('undef') ], [undef]);
             is_deeply(scalar mock_return('undef'), undef);
+
+            is_deeply([ mock_return('wantarray') ], ['want-array']);
+            is_deeply(scalar mock_return('wantarray'), 'want-scalar');
 
             is_deeply([ mock_return('none') ], []);
             is_deeply(scalar mock_return('none'), undef);
@@ -195,6 +191,25 @@ describe "return" => sub {
 
             is(test_override_return('err'), 66);
             is(test_override_return('ok'), 66);
+        };
+
+        it "works in all contexts" => sub {
+            sub test_finally_context {
+                my $mode = shift;
+                try { Error1->throw }
+                catch (Error1 $err) {
+                }
+                finally {
+                    return mock_return($mode);
+                }
+                die "This-is-never-called";
+            }
+
+            for (@RET_TYPES) {
+                is_deeply(scalar test_finally_context($_), scalar mock_return($_));
+                is_deeply([test_finally_context($_)], [mock_return($_)]);
+                test_finally_context($_); # void context
+            }
         };
     };
 
