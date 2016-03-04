@@ -95,13 +95,13 @@ static OP *my_parse_code_block(pTHX_ char *inject_code) {
         return 0;
     }
 
+    lex_read(1);
     // TODO better might be inject OPcode tree - instead of source-code
     if (inject_code) {
         DEBUG_MSG("Inject into block: %s\n", inject_code);
-        lex_read_to(lex_buf_ptr+1);
         lex_stuff_pvn(inject_code, strlen(inject_code), 0);
-        lex_stuff_pvs("{", 0);
     }
+    lex_stuff_pvs("{ local $" MAIN_PKG "::is_end_of_block;", 0);
 
     floor = start_subparse(0, CVf_ANON);
     content_op = build_block_content_op(parse_block(0));

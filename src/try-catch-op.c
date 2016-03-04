@@ -3,16 +3,13 @@
 
 #include <perl.h>
 
-#define build_assign_op(left_sv, right_op) \
-        newASSIGNOP(0, newSVOP(left_sv, 0), OP_SASSIGN, newSVOP(right_sv, 0))
-
 /*
- * append: END_OF_BLOCK_SV
+ * wrap with scope block and append call _set_is_end_of_block()
  */
 static OP* my_build_block_content_op(pTHX_ OP* orig_content_op) {
     return op_append_elem(OP_LINESEQ,
-            orig_content_op,
-            newSVOP(OP_CONST, 0, END_OF_BLOCK_SV)
+            op_scope(orig_content_op),
+            call_sub_op("_set_is_end_of_block", NULL)
         );
 }
 
@@ -26,7 +23,6 @@ static OP* my_build_catch_args_optree(pTHX_ OP* block_op, SV* class_name_sv) {
     return newLISTOP(OP_LIST, 0, (block_op), class_name_op);
 }
 
-#define call_sub_op(name, args_op)  my_call_sub_op(aTHX_ name, args_op)
 static OP* my_call_sub_op(pTHX_ char *name, OP* args_op) {
     GV *sub_gv = gv_fetchmethod(internal_stash, name);
 

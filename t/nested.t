@@ -39,7 +39,7 @@ describe "nested try/catch" => sub {
                 inner-finally
                 outer-catch
                 outer-finally
-                ouoter-done
+                outer-done
             /]);
     };
 };

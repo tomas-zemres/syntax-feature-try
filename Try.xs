@@ -67,7 +67,7 @@ run_block(HV* stm_handler, SV* coderef, int in_eval=0, SV* arg1=NULL)
         SPAGAIN;
         // TODO extract to function
         // if return called inside block:
-        if (!SvTRUE(ERRSV) && !(ret_count && IS_END_OF_BLOCK(TOPs))) {
+        if (!SvTRUE(ERRSV) && !SvTRUE(get_sv("is_end_of_block", 0))) {
             AV* ret_av = newAV();
             av_extend(ret_av, ret_count-1);
             for (i=ret_count-1; i >= 0; i--) {

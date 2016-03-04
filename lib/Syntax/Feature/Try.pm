@@ -38,6 +38,7 @@ sub register_exception_matcher {
 sub _custom_exception_matchers { @custom_exception_matchers }
 
 # TODO convert "our" to "my" variables
+our $is_end_of_block;
 our $return_values;
 
 sub _statement {
@@ -46,16 +47,19 @@ sub _statement {
     my $stm_handler = bless {finally => $finally_block}, __PACKAGE__;
 
     local $@;
+    local $is_end_of_block;
     my $exception = run_block($stm_handler, $try_block, 1);
     if ($exception and $catch_list) {
         my $catch_block = _get_exception_handler($exception, $catch_list);
         if ($catch_block) {
+            local $is_end_of_block;
             $exception = run_block($stm_handler, $catch_block, 1, $exception);
         }
     }
 
     if ($finally_block) {
         delete $stm_handler->{finally};
+        local $is_end_of_block;
         run_block($stm_handler, $finally_block);
     }
 
@@ -69,6 +73,7 @@ sub _statement {
 
 sub DESTROY {
     my ($self) = @_;
+    local $is_end_of_block;
     run_block($self, $self->{finally}) if $self->{finally};
 }
 
@@ -101,6 +106,10 @@ sub _exception_match_args {
 
 sub _rethrow {
     die (@_);
+}
+
+sub _set_is_end_of_block {
+    $is_end_of_block = 1;
 }
 
 sub _get_return_value {
