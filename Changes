@@ -1,5 +1,10 @@
 Revision history for perl module Syntax::Feature::Try
 
+1.004   2016-03-04
+
+   - Fix of bug #112298: Tests fail with perl 5.23.8
+        https://rt.cpan.org/Ticket/Display.html?id=112298
+
 1.003   2015-12-04
 
    - Fix issue with CGI::Carp: https://rt.cpan.org/Ticket/Display.html?id=104404
