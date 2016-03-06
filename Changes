@@ -1,5 +1,9 @@
 Revision history for perl module Syntax::Feature::Try
 
+1.005   2016-03-06
+
+   - Fix wrongly called op_convert_list in perl before 5.22
+
 1.004   2016-03-04
 
    - Fix of bug #112298: Tests fail with perl 5.23.8
