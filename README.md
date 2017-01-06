@@ -1,4 +1,4 @@
-syntax-feature-try
+syntax-feature-try [![Build Status](https://travis-ci.org/tomas-zemres/syntax-feature-try.png)](https://travis-ci.org/tomas-zemres/syntax-feature-try)
 ==================
 
 Perl module Syntax::Feature::Try
